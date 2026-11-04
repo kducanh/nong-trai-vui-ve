@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản trị — Nông Trại Vui Vẻ</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/admin.css">
+</head>
+<body>
+  <div class="admin-shell">
+    <header class="admin-top">
+      <a class="admin-brand" href="/">
+        <span class="admin-logo">🌱</span>
+        <span><b>Nông Trại Vui Vẻ</b><small>Bảng quản trị</small></span>
+      </a>
+      <div class="admin-top-actions">
+        <a class="admin-link" href="/">← Về game</a>
+        <button id="adminLogout" class="admin-btn ghost hidden">Đăng xuất</button>
+      </div>
+    </header>
+
+    <main id="adminLoginView" class="admin-login">
+      <div class="login-card">
+        <div class="login-mark">🔐</div>
+        <h1>Quản trị hệ thống</h1>
+        <p>Đăng nhập bằng tài khoản có quyền <b>admin</b> để xem người dùng, khóa tài khoản và theo dõi tải máy chủ.</p>
+        <form id="adminLoginForm" autocomplete="on">
+          <label>Tên tài khoản<input name="username" autocomplete="username" required maxlength="24" placeholder="admin"></label>
+          <label>Mật khẩu<input name="password" type="password" autocomplete="current-password" required maxlength="72" placeholder="••••••••"></label>
+          <div id="adminLoginError" class="login-error" role="alert"></div>
+          <button class="admin-btn primary wide" type="submit">Đăng nhập quản trị</button>
+        </form>
+        <p class="login-foot">Tài khoản admin được tạo tự động khi máy chủ chạy lần đầu. Xem <code>server/data/admin-credentials.txt</code>.</p>
+      </div>
+    </main>
+
+    <main id="adminDashboard" class="admin-dashboard hidden">
+      <section class="admin-hero">
+        <div>
+          <small>TRUNG TÂM ĐIỀU HÀNH</small>
+          <h1>Tổng quan máy chủ</h1>
+          <p id="adminUpdated">Đang tải số liệu...</p>
+        </div>
+        <div class="admin-hero-badge"><span id="adminOnlineBadge">0</span><small>đang online</small></div>
+      </section>
+
+      <nav class="admin-tabs" id="adminTabs">
+        <button class="admin-tab active" data-tab="overview">Tổng quan</button>
+        <button class="admin-tab" data-tab="users">Người dùng</button>
+        <button class="admin-tab" data-tab="capacity">Dung lượng</button>
+        <button class="admin-tab" data-tab="audit">Nhật ký</button>
+      </nav>
+
+      <section class="admin-panel" data-panel="overview">
+        <div class="stat-grid" id="statGrid"></div>
+        <div class="overview-grid">
+          <div class="admin-card">
+            <div class="card-head"><h2>Tải máy chủ</h2><span class="pill" id="loadPill">—</span></div>
+            <div class="meter-row"><span>RAM tiến trình</span><b id="meterRam">—</b></div>
+            <div class="meter"><i id="meterRamFill"></i></div>
+            <div class="meter-row"><span>Load average 1 phút</span><b id="meterLoad">—</b></div>
+            <div class="meter"><i id="meterLoadFill"></i></div>
+            <div class="meter-row"><span>Request / phút</span><b id="meterRpm">—</b></div>
+            <div class="mini-note">Số liệu sống lấy từ tiến trình Node và SQLite. Với tải lớn, xem tab <b>Dung lượng</b> để chọn cấu hình.</div>
+          </div>
+          <div class="admin-card">
+            <div class="card-head"><h2>Cấu hình gợi ý</h2><span class="pill gold">10k DAU</span></div>
+            <div id="quickCapacity" class="capacity-mini"></div>
+            <button class="admin-btn ghost" data-goto-tab="capacity">Mở máy tính dung lượng →</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-panel hidden" data-panel="users">
+        <div class="admin-card">
+          <div class="card-head">
+            <h2>Người dùng</h2>
+            <div class="users-tools">
+              <input id="userSearch" type="search" placeholder="Tìm username / tên hiển thị..." maxlength="40">
+              <button id="userSearchBtn" class="admin-btn">Tìm</button>
+              <button id="userRefreshBtn" class="admin-btn ghost">Làm mới</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>Người dùng</th><th>Vai trò</th><th>Trạng thái</th><th>Level</th><th>Lần cuối</th><th>Hành động</th></tr></thead>
+              <tbody id="userRows"></tbody>
+            </table>
+          </div>
+          <div class="pager"><button id="userPrev" class="admin-btn ghost">← Trước</button><span id="userPageInfo">—</span><button id="userNext" class="admin-btn ghost">Sau →</button></div>
+        </div>
+      </section>
+
+      <section class="admin-panel hidden" data-panel="capacity">
+        <div class="admin-card">
+          <div class="card-head"><h2>Máy tính dung lượng</h2><span class="pill">theo DAU & tải đồng thời</span></div>
+          <div class="capacity-form">
+            <label>DAU (người dùng hoạt động/ngày)<input id="capDau" type="number" min="1000" max="10000000" step="1000" value="10000"></label>
+            <label>Tỷ lệ online cùng lúc (%)<input id="capConc" type="number" min="2" max="80" step="1" value="15"></label>
+            <label>Request / người / phút<input id="capReq" type="number" min="2" max="120" step="1" value="12"></label>
+            <button id="capCalc" class="admin-btn primary">Tính toán</button>
+          </div>
+          <div id="capacityResult" class="capacity-result"></div>
+          <div class="mini-note">Mô hình tham khảo cho API JSON nhỏ, polling 20–30 giây và bạn bè. Xem chi tiết giả định trong <code>docs/server-capacity.md</code>.</div>
+        </div>
+        <div class="admin-card">
+          <div class="card-head"><h2>Các mốc tham chiếu</h2><span class="pill gold">để lập kế hoạch</span></div>
+          <div class="table-wrap">
+            <table class="admin-table capacity-table">
+              <thead><tr><th>DAU</th><th>Peak online</th><th>Req/s</th><th>App</th><th>Postgres</th><th>Redis</th><th>Băng thông/ngày</th></tr></thead>
+              <tbody id="capacityTiers"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-panel hidden" data-panel="audit">
+        <div class="admin-card">
+          <div class="card-head"><h2>Nhật ký quản trị</h2><button id="auditRefresh" class="admin-btn ghost">Làm mới</button></div>
+          <div class="table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>Thời gian</th><th>Quản trị viên</th><th>Hành động</th><th>Đối tượng</th></tr></thead>
+              <tbody id="auditRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div id="adminToast" class="admin-toast hidden"></div>
+  <script src="assets/admin.js" defer></script>
+</body>
+</html>

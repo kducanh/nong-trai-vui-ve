@@ -1,0 +1,212 @@
+/* =========================================================
+   Tài khoản, bạn bè, tin nhắn
+   ========================================================= */
+.start-account-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  margin-top:.55em;padding:.45em .95em;
+  border-radius:2em;border:.09em solid rgba(255,253,240,.75);
+  background:rgba(255,252,236,.72);
+  color:#6d5127;font-size:.66em;font-weight:900;
+  box-shadow:0 .12em 0 rgba(90,65,25,.2);
+}
+.start-account-btn:hover{background:#fff}
+.account-btn{
+  height:2.05em;
+  display:flex; align-items:center; gap:.28em;
+  padding:0 .55em 0 .4em;
+  border-radius:2em;
+  border:.09em solid #fffdf2;
+  background:linear-gradient(#fffdf4,#ffe9b8);
+  box-shadow:0 .14em 0 rgba(110,75,30,.35);
+  color:#6b4d24; font-size:.58em; font-weight:900;
+  white-space:nowrap; position:relative;
+}
+.account-btn:hover{filter:brightness(1.03)}
+.account-btn .acc-ic{font-size:1.2em;line-height:1}
+.account-btn #accountLabel{max-width:7em;overflow:hidden;text-overflow:ellipsis}
+.account-btn .account-dot{
+  position:absolute; right:.25em; top:.2em;
+  width:.55em;height:.55em;border-radius:50%;
+  background:#59b53b;border:.1em solid #fff;
+  box-shadow:0 0 0 .12em rgba(89,181,59,.18);
+}
+.visit-social-btn{
+  height:2.2em; padding:0 .75em; border-radius:2em;
+  border:.09em solid #fffdf2; background:rgba(255,251,235,.9);
+  color:#684b22; font-size:.62em; font-weight:900;
+  white-space:nowrap;
+}
+.visit-social-btn:hover{background:#fff}
+
+.account-overlay{
+  position:fixed; inset:0; z-index:120;
+  display:flex; align-items:center; justify-content:center;
+  padding:1.2em;
+  background:rgba(24,36,18,.52);
+  backdrop-filter:blur(5px);
+}
+.account-overlay.hidden{display:none}
+.account-panel{
+  width:min(54em,96vw);
+  max-height:88vh;
+  overflow:auto;
+  border-radius:1.1em;
+  background:linear-gradient(165deg,#fffdf6,#fff6e2);
+  border:.14em solid #fffdf5;
+  box-shadow:0 .8em 3em rgba(20,35,10,.35);
+  padding:1.05em 1.15em 1.2em;
+  position:relative;
+  scrollbar-width:thin;
+  scrollbar-color:#c49a5a transparent;
+}
+.account-panel::before{
+  content:""; position:absolute; inset:0 0 auto; height:.28em;
+  border-radius:1.1em 1.1em 0 0;
+  background:linear-gradient(90deg,#75c34b,#e5bc4a,#64cdc5);
+}
+.account-close{
+  position:absolute; right:.7em; top:.7em;
+  width:2em; height:2em; border-radius:50%;
+  border:.1em solid #f6d8b5;
+  background:linear-gradient(#ff9f8d,#e25b47);
+  color:#fff; font-size:.8em; font-weight:900;
+  box-shadow:0 .12em 0 #a93a2b;
+}
+.account-head{display:flex; align-items:center; gap:.65em; padding-right:2.4em; margin-bottom:.5em}
+.account-avatar{
+  width:3.3em;height:3.3em;border-radius:.85em;
+  display:grid;place-items:center; font-size:1.55em;
+  background:radial-gradient(circle at 35% 20%,#fffdf0,#b9e58e 64%,#77b74b);
+  border:.14em solid #fff; box-shadow:0 .16em 0 rgba(70,100,35,.2);
+  flex:0 0 auto;
+}
+.account-head-copy{min-width:0;flex:1}
+.account-head-copy small{display:block;font-size:.48em;letter-spacing:.14em;font-weight:900;color:#9a7a42;text-transform:uppercase}
+.account-head-copy h1{margin:.05em 0 0;font-size:1.45em;line-height:1.05;color:#42601f;font-family:var(--font-round)}
+.account-head-copy p{margin:.15em 0 0;font-size:.62em;color:#8b7451}
+.account-head-copy .role-badge{display:inline-block;margin-left:.3em;padding:.15em .45em;border-radius:1em;background:rgba(160,110,220,.16);color:#7a4fa5;font-size:.42em;vertical-align:middle}
+.account-head-actions{display:flex;gap:.3em;margin-left:auto;align-items:center;flex-wrap:wrap}
+
+.acc-tabs{display:flex;gap:.3em;flex-wrap:wrap;border-bottom:1px solid rgba(125,95,45,.16);padding-bottom:.5em;margin-bottom:.65em}
+.acc-tab{
+  border:0;background:transparent;border-radius:2em;
+  padding:.45em .8em;font-size:.62em;font-weight:900;color:#8b7250;
+}
+.acc-tab.active{background:linear-gradient(#fffdf2,#ffe7b3);color:#5e461f;box-shadow:0 .1em 0 rgba(120,85,30,.2)}
+.acc-tab:hover{background:rgba(255,246,220,.7)}
+
+.auth-tabs{display:flex;gap:.3em;margin-bottom:.7em}
+.auth-tab{flex:1;border:.1em solid rgba(140,105,50,.18);background:rgba(255,253,242,.6);border-radius:.6em;padding:.55em;font-size:.64em;font-weight:900;color:#846b47}
+.auth-tab.active{background:linear-gradient(#fffdf3,#ffe8b7);color:#5a421f;border-color:#e4bd68}
+.auth-form{display:grid;gap:.55em}
+.auth-form label{display:flex;flex-direction:column;gap:.22em;font-size:.56em;font-weight:900;color:#7c6645}
+.auth-form input{
+  width:100%; padding:.65em .7em; border-radius:.55em;
+  border:.1em solid rgba(125,90,40,.2); background:#fffdf7;
+  font-size:1.2em; color:#35481f; outline:none;
+}
+.auth-form input:focus,.auth-form select:focus{border-color:#79b84d;box-shadow:0 0 0 .14em rgba(121,184,77,.16)}
+.acc-select{
+  width:100%; padding:.65em .7em; border-radius:.55em;
+  border:.1em solid rgba(125,90,40,.2); background:#fffdf7;
+  font-size:1.05em; color:#35481f; outline:none;
+}
+.auth-form .auth-submit{margin-top:.25em}
+.auth-error{min-height:1.2em;color:#c34b38;font-size:.56em;font-weight:800}
+.auth-note{font-size:.5em;line-height:1.5;color:#99886c;margin-top:.3em}
+.guest-note{display:flex;align-items:center;gap:.35em;font-size:.52em;color:#8c7b5d;margin-top:.4em}
+
+.account-btn2{
+  border:.1em solid #fffdf2; border-radius:2em; padding:.5em .85em;
+  font-size:.6em; font-weight:900; color:#654b25;
+  background:linear-gradient(#fffdf3,#ffe7b3);
+  box-shadow:0 .12em 0 rgba(110,75,30,.28);
+}
+.account-btn2:hover{filter:brightness(1.03)}
+.account-btn2.primary{background:linear-gradient(#7dcd50,#4e9e31);color:#fff;border-color:#3d7e26;box-shadow:0 .14em 0 #34701f}
+.account-btn2.ghost{background:rgba(255,255,255,.55);box-shadow:none}
+.account-btn2.danger{background:linear-gradient(#ffb2a1,#e36b54);color:#fff;border-color:#b94a36;box-shadow:0 .12em 0 #9d3827}
+.account-btn2.small{padding:.35em .65em;font-size:.52em}
+
+.acc-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.45em;margin-bottom:.7em}
+.acc-stat{background:rgba(128,160,90,.1);border:.09em solid rgba(128,160,90,.14);border-radius:.6em;padding:.5em .6em}
+.acc-stat small{display:block;font-size:.44em;color:#8d7e62;text-transform:uppercase;letter-spacing:.08em;font-weight:900}
+.acc-stat b{display:block;font-size:.95em;color:#3d5d23;margin-top:.1em}
+.acc-stat span{display:block;font-size:.46em;color:#9a896b;margin-top:.05em}
+
+.acc-section{margin-top:.65em}
+.acc-section-head{display:flex;align-items:center;justify-content:space-between;gap:.5em;margin-bottom:.4em}
+.acc-section-head h2{font-size:.78em;margin:0;color:#49651f;font-family:var(--font-round)}
+.acc-section-head small{font-size:.48em;color:#9a896b}
+.acc-friend-search{display:flex;gap:.3em;align-items:center;flex-wrap:wrap}
+.acc-friend-search input{flex:1;min-width:8em;padding:.55em .65em;border-radius:.55em;border:.1em solid rgba(125,90,40,.2);background:#fffdf7;font-size:.6em}
+.acc-search-msg{font-size:.52em;color:#8b7450;margin-top:.25em;min-height:1.1em}
+
+.friend-list{display:flex;flex-direction:column;gap:.35em}
+.friend-row{display:flex;align-items:center;gap:.5em;padding:.45em .5em;border-radius:.65em;background:rgba(255,255,255,.58);border:.08em solid rgba(130,105,60,.13)}
+.friend-row:hover{background:rgba(255,250,232,.9)}
+.fr-avatar{width:2.2em;height:2.2em;border-radius:.6em;display:grid;place-items:center;font-size:1.05em;background:linear-gradient(#e9f8d8,#c7e9aa);border:.1em solid #fff;flex:0 0 auto}
+.fr-copy{min-width:0;flex:1;line-height:1.1}
+.fr-copy b{display:block;font-size:.62em;color:#3e5725;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr-copy small{display:block;font-size:.48em;color:#938365;margin-top:.1em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr-status{width:.5em;height:.5em;border-radius:50%;background:#c1b7a3;flex:0 0 auto}
+.fr-status.online{background:#59b53b;box-shadow:0 0 0 .15em rgba(89,181,59,.16)}
+.fr-actions{display:flex;gap:.25em;flex-wrap:wrap;justify-content:flex-end}
+.fr-empty{padding:.9em;text-align:center;color:#9a896c;font-size:.55em;background:rgba(255,252,240,.5);border:.08em dashed rgba(140,110,60,.25);border-radius:.6em}
+
+.request-list{display:flex;flex-direction:column;gap:.35em}
+.request-row{display:flex;align-items:center;gap:.5em;padding:.45em .5em;border-radius:.6em;background:rgba(255,246,214,.7);border:.08em solid rgba(200,160,70,.2)}
+.request-row .fr-copy b{font-size:.58em}
+.request-row .fr-copy small{font-size:.46em}
+.req-actions{display:flex;gap:.25em;margin-left:auto}
+
+.pending-note{font-size:.52em;color:#a06c28;background:rgba(255,238,190,.6);border:.08em solid rgba(210,165,60,.25);border-radius:.5em;padding:.35em .5em;margin-top:.35em}
+.acc-logout-row{display:flex;justify-content:space-between;gap:.4em;flex-wrap:wrap;margin-top:.8em;padding-top:.6em;border-top:1px solid rgba(125,95,45,.14)}
+.acc-badge{display:inline-block;padding:.1em .4em;border-radius:1em;background:rgba(100,170,80,.14);color:#4e7c33;font-size:.45em;font-weight:900;margin-left:.25em}
+
+/* chat */
+.chat-view{display:flex;flex-direction:column;min-height:16em}
+.chat-head{display:flex;align-items:center;gap:.5em;margin-bottom:.5em}
+.chat-head .fr-avatar{width:2.6em;height:2.6em;font-size:1.2em}
+.chat-head b{display:block;font-size:.72em;color:#405b24}
+.chat-head small{display:block;font-size:.48em;color:#99886c}
+.chat-log{
+  flex:1;min-height:10em;max-height:22em;overflow:auto;
+  display:flex;flex-direction:column;gap:.35em;
+  padding:.55em;border-radius:.7em;
+  background:rgba(255,252,240,.6);border:.08em solid rgba(130,105,60,.14);
+}
+.chat-msg{max-width:80%;padding:.4em .55em;border-radius:.7em;font-size:.56em;line-height:1.4;white-space:pre-wrap;word-break:break-word}
+.chat-msg.mine{align-self:flex-end;background:linear-gradient(#dff5c8,#bde59b);color:#36531f;border-bottom-right-radius:.2em}
+.chat-msg.theirs{align-self:flex-start;background:#fffdf7;color:#5d513a;border:.06em solid rgba(140,110,60,.16);border-bottom-left-radius:.2em}
+.chat-msg small{display:block;font-size:.85em;opacity:.6;margin-top:.15em;text-align:right}
+.chat-compose{display:flex;gap:.35em;margin-top:.45em}
+.chat-compose input{flex:1;padding:.6em .7em;border-radius:.55em;border:.1em solid rgba(125,90,40,.2);background:#fffdf7;font-size:.6em}
+.chat-empty{text-align:center;color:#9a896c;font-size:.55em;padding:2em .5em}
+.account-toast{
+  position:fixed;z-index:140;left:50%;bottom:2em;transform:translateX(-50%) translateY(.4em);
+  background:#33471f;color:#f8ffe9;border-radius:2em;padding:.65em 1.1em;
+  font-size:.62em;font-weight:700;box-shadow:0 .5em 1.4em rgba(20,30,10,.28);
+  opacity:0;pointer-events:none;transition:.2s;max-width:88vw;
+}
+.account-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.account-toast.err{background:#8d3b2b}
+
+@media (max-width: 900px){
+  .account-btn #accountLabel{display:none}
+  .account-btn{width:2.1em;height:2.1em;padding:0;justify-content:center;border-radius:50%}
+  .account-panel{width:96vw;max-height:92vh;padding:.8em}
+  .acc-stats{grid-template-columns:repeat(2,1fr)}
+  .account-head-copy h1{font-size:1.15em}
+  .account-head-actions{width:100%;margin-left:0}
+  .visit-social-btn{display:none}
+}
+@media (max-width: 560px){
+  .acc-tabs{gap:.2em}
+  .acc-tab{font-size:.55em;padding:.4em .6em}
+  .friend-row{flex-wrap:wrap}
+  .fr-actions{margin-left:auto}
+  .account-head{align-items:flex-start}
+  .account-head .account-avatar{width:2.7em;height:2.7em;font-size:1.25em}
+  .auth-form input{font-size:1.05em}
+}

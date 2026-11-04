@@ -1,0 +1,14 @@
+{
+  "name": "nong-trai-vui-ve",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Nông Trại Vui Vẻ — game nông trại tuổi thơ với tài khoản, bạn bè và quản trị.",
+  "scripts": {
+    "start": "node server.mjs",
+    "seed:demo": "node server/seed-demo.mjs"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}
