@@ -2,6 +2,8 @@
 
 Một bản dựng lại fan-made của tựa game nông trại tuổi thơ, lấy cảm hứng từ hai ảnh chụp bạn gửi và lối chơi của *Nông Trại Vui Vẻ / Farm Day* ngày xưa.
 
+> Mã nguồn: **https://github.com/kducanh/nong-trai-vui-ve**
+
 Lần cập nhật này tập trung vào việc **tách giao diện thành các trang khu vực riêng**, làm gọn màn hình trồng trọt và thêm tính năng **đến thăm vườn bạn bè**.
 Mỗi khu **Trồng trọt · Chăn nuôi · Hồ cá · Vườn cây** là một trang riêng, không còn là popup chồng lên khu vườn.
 
