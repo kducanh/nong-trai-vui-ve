@@ -4,8 +4,7 @@ Một bản dựng lại fan-made của tựa game nông trại tuổi thơ, l�
 
 > Mã nguồn: **https://github.com/kducanh/nong-trai-vui-ve**
 
-Lần cập nhật này tập trung vào việc **tách giao diện thành các trang khu vực riêng**, làm gọn màn hình trồng trọt và thêm tính năng **đến thăm vườn bạn bè**.
-Mỗi khu **Trồng trọt · Chăn nuôi · Hồ cá · Vườn cây** là một trang riêng, không còn là popup chồng lên khu vườn.
+Lần cập nhật này tập trung vào **Trồng trọt**, **Quảng trường** và **Vườn bạn**. Ba khu **Chăn nuôi · Hồ cá · Vườn cây** đang được **tạm ẩn** để hoàn thiện ở giai đoạn sau; code vẫn được giữ nguyên, chỉ ẩn khỏi giao diện.
 
 ![Màn hình bắt đầu](screenshots/start.png)
 
@@ -71,15 +70,11 @@ npm run seed:demo
 Mỗi mục mở một khu vực riêng, không còn dồn hết lên màn hình chính.
 
 ### Cột khu vực trong Nông trại
-`Trồng trọt` · `Chăn nuôi` · `Hồ cá` · `Vườn cây` · `Quảng trường`
-
-Đây là các **trang khu vực riêng**, chuyển qua lại bằng cột bên trái. Không còn hiện cả bốn khu cùng lúc trên một màn hình.
+`Trồng trọt` · `Quảng trường`
 
 - **Trồng trọt** là trang mặc định, chỉ có ruộng rau, nhà dụng cụ, bù nhìn và các luống đất.
-- **Chăn nuôi** là trang sân chuồng với bò/gà, cỏ khô, máng ăn và thanh điều khiển cho ăn/thu hoạch.
-- **Hồ cá** là trang câu cá với hồ nước và minigame kéo cá.
-- **Vườn cây** là trang cây táo với hình cây, trạng thái chín và nút hái quả.
-- **Quảng trường** là rạp chiếu ngoài trời dùng chung hàng đợi YouTube.
+- **Quảng trường** là rạp chiếu tối kiểu 3D dùng chung hàng đợi YouTube.
+- **Chăn nuôi, Hồ cá, Vườn cây** đang **tạm ẩn**; mã nguồn vẫn còn để mở lại ở giai đoạn sau.
 - Thẻ **“Việc đang làm”** bên trái luôn nhắc mục tiêu tiếp theo; bấm vào để mở Nhiệm vụ.
 
 ---
@@ -102,11 +97,9 @@ Mỗi mục mở một khu vực riêng, không còn dồn hết lên màn hình
 
 ---
 
-## 🐄 Chăn nuôi · 🎣 Hồ cá · 🌳 Vườn cây
+## 🐄 Chăn nuôi · 🎣 Hồ cá · 🌳 Vườn cây — tạm ẩn
 
-- **Chăn nuôi**: cả một sân chuồng riêng với chuồng bò đỏ, chuồng gà, hàng rào, cỏ khô và ba con vật. Click trực tiếp lên bò/gà để chọn, rồi cho ăn hoặc thu sữa/trứng ở thanh điều khiển dưới.
-- **Hồ cá**: hồ nước lớn có cầu gỗ, sen, sậy, cá bơi và cần câu. Thả câu, chờ phao rung, bấm **KÉO** thật nhanh khi thấy dấu **!**.
-- **Vườn cây**: vườn táo riêng với cây táo chính, hai cây phụ, giỏ táo, thang và lối đi. Hái 3 quả mỗi 75 giây, hoặc click thẳng vào cây khi táo chín.
+Ba khu vực này đã được gỡ khỏi thanh điều hướng ở giai đoạn hiện tại để tập trung vào Trồng trọt, Quảng trường và Vườn bạn. Code cảnh, logic và API vẫn được giữ trong `assets/areas.js`, `assets/game.js` để mở lại sau. Các nhiệm vụ ngày và chuỗi nhiệm vụ liên quan cũng đã được thay bằng nhiệm vụ làm vườn để không bị kẹt.
 
 ---
 
@@ -128,7 +121,7 @@ Mở **Vườn bạn** trên thanh menu để ghé thăm vườn của 3 ngườ
 
 ## 🎬 Quảng trường — xem YouTube cùng nhau
 
-Mở **Quảng trường** ở cột bên trái để vào rạp chiếu ngoài trời của làng.
+Mở **Quảng trường** ở cột bên trái để vào rạp chiếu tối kiểu **wetube ciné 3D**: phòng tối, màn chiếu viền vàng, 100 ghế phối cảnh, đèn lối đi, quả cầu disco và các tia laser. Giao diện lấy cảm hứng từ dự án [wetube-cine-3d](https://github.com/kducanh/wetube-cine-3d) của tác giả.
 
 - Mọi người trong cùng phòng dùng **một hàng đợi và một mốc thời gian phát**.
 - Dán liên kết hoặc mã video YouTube vào ô nhập; server chỉ nhận **11 ký tự ID** hợp lệ.
@@ -197,7 +190,7 @@ Tóm tắt nhanh: bản hiện tại phù hợp **1k–10k DAU** trên một VPS
 
 | Thao tác | Tác dụng |
 |---|---|
-| Click / chạm | Chọn ô đất, cây, con vật, hồ cá, cây táo, bạn bè |
+| Click / chạm | Chọn ô đất, cây trồng, đất khóa, bạn bè |
 | `1` … `6` | Bàn tay, Cuốc, Gieo hạt, Tưới, Bón phân, Thu hoạch |
 | `S` | Mở Chợ |
 | `B` | Mở Túi đồ |
@@ -210,9 +203,9 @@ Tóm tắt nhanh: bản hiện tại phù hợp **1k–10k DAU** trên một VPS
 
 ## 🖼️ Ảnh xem trước
 
-| Vườn bạn | Chăn nuôi |
+| Vườn bạn | Quảng trường |
 |---|---|
-| ![Vườn bạn](screenshots/friends.png) | ![Chăn nuôi](screenshots/animals.png) |
+| ![Vườn bạn](screenshots/friends.png) | ![Quảng trường](screenshots/plaza.png) |
 
 ---
 
@@ -241,6 +234,7 @@ F:\nongtrai
 │   ├── theme.css       # bảng màu, bố cục trồng trọt, giao diện mở đất
 │   ├── land.js         # giá đất, quyền sở hữu và chuyển đổi bản lưu cũ
 │   ├── plaza.js        # quảng trường YouTube phía client
+│   ├── plaza-cinema.js # nền rạp 2.5D (ghế, đèn, màn chiếu)
 │   ├── plaza.css
 │   ├── plaza-night.svg
 │   ├── account.css     # tài khoản, bạn bè, chat
@@ -257,10 +251,8 @@ F:\nongtrai
 └── screenshots
     ├── start.png
     ├── farm.png
+    ├── unlock-land.png
     ├── friends.png
-    ├── animals.png
-    ├── fishing.png
-    ├── orchard.png
     ├── plaza.png
     ├── account.png
     ├── account_settings.png

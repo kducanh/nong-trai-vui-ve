@@ -75,11 +75,29 @@
     const needed = r.snapshot?.skipNeeded || 1;
     $('Add').disabled = !r.snapshot || r.adding;
     $('Skip').disabled = !current || r.skipping || !!r.snapshot?.voted;
-    text($('Skip'), r.snapshot?.voted ? `Đã bỏ phiếu · ${votes}/${needed}` : current ? `Bỏ qua · ${votes}/${needed}` : 'Bỏ qua');
+    const skipText = r.snapshot?.voted ? `Đã bỏ phiếu · ${votes}/${needed}` : 'Bỏ phiếu bỏ qua';
+    const skipLabel = $('SkipLabel');
+    if (skipLabel) text(skipLabel, skipText);
+    else text($('Skip'), skipText);
+    text($('SkipInfo'), r.snapshot?.voted ? `${votes}/${needed} người đồng ý · bạn đã bỏ phiếu` : `${votes}/${needed} người đồng ý`);
+    const fill = $('SkipFill');
+    if (fill) fill.style.width = `${needed ? Math.min(100, votes / needed * 100) : 0}%`;
     $('Live').disabled = !r.movie?.ready;
     show($('Retry'), !!(r.connection || r.movie?.failed || r.movie?.autoplayBlocked));
+    text($('StateText'), current ? 'Đang chiếu' : 'Chờ chiếu');
+    text($('QueueBadge'), r.snapshot?.queue?.length ?? 0);
     const feedback = Date.now() - r.feedbackAt < 6500 ? r.feedback : '';
-    text($('Status'), [feedback, r.connection, r.movie?.note].filter(Boolean).join(' '));
+    const parts = [feedback, r.connection, r.movie?.note].filter(Boolean);
+    if (!current && !parts.length) parts.push('Mở Hàng chờ để thêm video YouTube.');
+    text($('Status'), parts.join(' '));
+  }
+
+  function setQueueOpen(r, open) {
+    const panel = $('QueuePanel');
+    if (!panel) return;
+    r.queueOpen = !!open;
+    panel.classList.toggle('hidden', !open);
+    $('QueueToggle')?.classList.toggle('active', !!open);
   }
 
   function feedback(r, value) {
@@ -362,9 +380,12 @@
     if (room) return;
     const r = {
       controller: new AbortController(), sequence: 0, applied: 0, snapshot: null,
-      movie: null, reading: false, adding: false, skipping: false, feedbackAt: 0, connection: ''
+      movie: null, reading: false, adding: false, skipping: false, feedbackAt: 0,
+      connection: '', queueOpen: false
     };
     room = r;
+    window.PlazaCinema?.start();
+    setQueueOpen(r, false);
     show($('Placeholder'), true);
     show($('WatchLink'), false);
     $('WatchLink').removeAttribute('href');
@@ -378,6 +399,8 @@
     $('Skip').addEventListener('click', () => skip(r), listen);
     $('Live').addEventListener('click', () => sync(r, r.movie, true), listen);
     $('Retry').addEventListener('click', () => retry(r), listen);
+    $('QueueToggle').addEventListener('click', () => setQueueOpen(r, !r.queueOpen), listen);
+    $('QueueClose').addEventListener('click', () => setQueueOpen(r, false), listen);
     // A quick return must rejoin after the previous presence removal reaches the server.
     Promise.resolve(departure).then(() => {
       if (room !== r) return;
@@ -393,6 +416,7 @@
     clearInterval(r.timer);
     r.controller.abort();
     stopMovie(r);
+    window.PlazaCinema?.stop();
     departure = fetch('/api/plaza/leave', {
       method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
       body: '{}', keepalive: true, signal: AbortSignal.timeout(4500)

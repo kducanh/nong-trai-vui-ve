@@ -381,3 +381,5 @@ button { -webkit-tap-highlight-color: transparent; }
   .start-note { margin-top: .8em; }
   .start-footer { bottom: 1.15em; }
 }
+
+.rail-btn.feature-hidden { display: none !important; }

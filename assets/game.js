@@ -134,16 +134,14 @@
     { id: 'q4', type: 'harvest', need: 2, title: 'Thu hoạch 2 cây', reward: { coins: 80, xp: 20 } },
     { id: 'q5', type: 'sell', need: 3, title: 'Bán 3 nông sản', reward: { coins: 60, xp: 15 } },
     { id: 'q6', type: 'buySeed', need: 1, title: 'Mua 1 gói hạt giống', reward: { coins: 30, xp: 10 } },
-    { id: 'q7', type: 'feed', need: 1, title: 'Cho vật nuôi ăn', reward: { coins: 100, xp: 25, seeds: { corn: 2 } } },
-    { id: 'q8', type: 'fish', need: 1, title: 'Câu được 1 con cá', reward: { coins: 80, xp: 20 } },
+    { id: 'q7', type: 'harvest', need: 3, title: 'Thu hoạch 3 cây', reward: { coins: 100, xp: 25, seeds: { corn: 2 } } },
+    { id: 'q8', type: 'water', need: 3, title: 'Tưới 3 ô đất', reward: { coins: 80, xp: 20 } },
     { id: 'q9', type: 'level', need: 2, title: 'Đạt cấp 2', reward: { coins: 150, items: { fertilizer: 2 } } }
   ];
   const DAILY_POOL = [
     { type: 'harvest', need: 6, title: 'Thu hoạch 6 cây', reward: { coins: 120, xp: 25 } },
     { type: 'water', need: 5, title: 'Tưới 5 ô đất', reward: { coins: 90, xp: 15 } },
     { type: 'sell', need: 6, title: 'Bán 6 nông sản', reward: { coins: 110, xp: 20 } },
-    { type: 'feed', need: 2, title: 'Cho vật nuôi ăn 2 lần', reward: { coins: 100, xp: 20 } },
-    { type: 'fish', need: 2, title: 'Câu 2 con cá', reward: { coins: 130, xp: 25 } },
     { type: 'plant', need: 4, title: 'Gieo 4 hạt giống', reward: { coins: 95, xp: 18 } }
   ];
 
@@ -271,6 +269,12 @@
     s.quests.chainProgress = Math.max(0, s.quests.chainProgress || 0);
     s.quests.dailyProgress = Array.isArray(s.quests.dailyProgress) ? s.quests.dailyProgress : [];
     s.quests.daily = Array.isArray(s.quests.daily) ? s.quests.daily : [];
+    // Chăn nuôi / Hồ cá đang tạm ẩn: bỏ nhiệm vụ cũ liên quan để không bị kẹt.
+    if (s.quests.daily.some(d => d && (d.type === 'feed' || d.type === 'fish'))) {
+      s.quests.daily = [];
+      s.quests.dailyProgress = [];
+      s.quests.dailyDate = '';
+    }
     s.player.energy = clamp(Number(s.player.energy) || 0, 0, energyMax(s.player.level));
     s.player.energyTs = Number(s.player.energyTs) || now();
     return s;
@@ -2010,7 +2014,7 @@
         </div>`;
       }).join('');
     } else {
-      cards = Object.keys(SUPPLIES).map(id => {
+      cards = Object.keys(SUPPLIES).filter(id => id !== 'hay').map(id => {
         const s = SUPPLIES[id];
         const owned = state.inventory[id] || 0;
         const total = s.price * qty;
@@ -2050,7 +2054,7 @@
 
     return modalHead('Cửa hàng nông trại', 'Hạt giống tốt, vật tư đủ, mùa màng bội thu!') +
       `<div class="modal-body">
-        <p class="modal-intro">Mua hạt giống để gieo trồng, mua vật tư để chăm sóc cây và vật nuôi. Nông sản thu hoạch đem bán trong Túi đồ.</p>
+        <p class="modal-intro">Mua hạt giống để gieo trồng và vật tư để chăm sóc cây. Nông sản thu hoạch đem bán trong Túi đồ.</p>
         ${tabs}
         <div class="shop-grid">${cards}</div>
       </div>
@@ -2297,8 +2301,8 @@
     const letter = ready
       ? `<div class="letter-paper">
           <h3>Gửi Bé Nông mến thương,</h3>
-          <p>Bà Tư nghe nói nông trại của cháu mùa này xanh tốt lắm. Bà gửi chút quà nhỏ để cháu mua thêm hạt giống, chăm đàn gà và bò cho thật khỏe nhé.</p>
-          <p>Nhớ tưới cây mỗi ngày, đừng để đất khô. Khi nào rảnh, ghé thăm vườn thú và câu cá cùng bà con trong làng.</p>
+          <p>Bà Tư nghe nói nông trại của cháu mùa này xanh tốt lắm. Bà gửi chút quà nhỏ để cháu mua thêm hạt giống và chăm vườn rau thật tốt nhé.</p>
+          <p>Nhớ tưới cây mỗi ngày, đừng để đất khô. Khi nào rảnh, ghé Quảng trường xem YouTube cùng bà con trong làng.</p>
           ${gifts}
           <div class="sign">Thương cháu — Bà Tư 🌾</div>
         </div>`
@@ -2345,10 +2349,8 @@
           <div class="help-step"><span class="hs-ico">⛏️</span><div><b>1. Mở đất & khai hoang</b>Bắt đầu với 2 ô miễn phí. Ô khóa cần đủ cả cấp độ và vàng. Mỗi cấp từ 2 đến 6 cho phép mua thêm 2 ô; giá 80–800 vàng. Dùng Cuốc để tạo luống sau khi mở.</div></div>
           <div class="help-step"><span class="hs-ico">🌱</span><div><b>2. Gieo & tưới</b>Chọn hạt giống, click ô đất để gieo. Tưới nước giúp cây lớn nhanh hơn.</div></div>
           <div class="help-step"><span class="hs-ico">🧺</span><div><b>3. Thu hoạch</b>Khi cây chín, click để hái. Mở Túi đồ để bán nông sản lấy vàng.</div></div>
-          <div class="help-step"><span class="hs-ico">🐄</span><div><b>4. Chăn nuôi</b>Mở trang “Chăn nuôi” ở cột bên trái để cho ăn, thu sữa và trứng.</div></div>
-          <div class="help-step"><span class="hs-ico">🎣</span><div><b>5. Câu cá</b>Mở “Hồ cá”, thả câu rồi nhấn KÉO thật nhanh khi cá cắn.</div></div>
-          <div class="help-step"><span class="hs-ico">🌳</span><div><b>6. Vườn cây</b>Mở “Vườn cây” để hái 3 quả táo mỗi 75 giây.</div></div>
-          <div class="help-step"><span class="hs-ico">👩‍🌾</span><div><b>7. Vườn bạn</b>Mở “Vườn bạn” trên thanh menu để ghé thăm, tưới giúp và nhận quà từ bạn bè.</div></div>
+          <div class="help-step"><span class="hs-ico">👩‍🌾</span><div><b>4. Vườn bạn</b>Mở “Vườn bạn” trên thanh menu để ghé thăm, tưới giúp và nhận quà từ bạn bè.</div></div>
+          <div class="help-step"><span class="hs-ico">🎬</span><div><b>5. Quảng trường</b>Mở “Quảng trường” ở cột bên trái để xem YouTube cùng mọi người. Chăn nuôi, Hồ cá và Vườn cây sẽ mở lại ở giai đoạn sau.</div></div>
         </div>
         <div class="help-tip">
           <b>Mẹo nhỏ:</b> Nước và phân bón giúp cây chín nhanh hơn; bón phân còn tăng thêm 1 nông sản mỗi lần thu hoạch. Đừng quên mở Hòm thư mỗi ngày để nhận quà của Bà Tư.
@@ -2372,7 +2374,7 @@
   function welcomeHTML() {
     return modalHead('Chào mừng về nông trại!', 'Một ngày nắng đẹp đang chờ Bé Nông') +
       `<div class="modal-body">
-        <p class="modal-intro">Đây là nông trại nhỏ của bạn, được chia thành các trang riêng: Trồng trọt, Chăn nuôi, Hồ cá và Vườn cây. Hãy bắt đầu ở trang Trồng trọt bằng những việc đơn giản nhất.</p>
+        <p class="modal-intro">Đây là nông trại nhỏ của bạn. Giai đoạn này tập trung vào Trồng trọt và Quảng trường; Chăn nuôi, Hồ cá và Vườn cây sẽ được mở lại sau. Hãy bắt đầu bằng những việc đơn giản nhất.</p>
         <div class="help-grid">
           <div class="help-step"><span class="hs-ico">⛏️</span><div><b>Chọn Cuốc</b>Click vào ô cỏ để khai hoang. Mỗi hành động tốn 1 năng lượng.</div></div>
           <div class="help-step"><span class="hs-ico">🌱</span><div><b>Gieo & tưới</b>Chọn hạt giống ở thanh dưới, click ô đất. Tưới nước để cây lớn nhanh.</div></div>
@@ -2387,7 +2389,7 @@
   function confirmHTML() {
     return modalHead('Bắt đầu lại ván mới?', 'Khu vườn cũ sẽ được thay bằng một mảnh đất mới') +
       `<div class="modal-body">
-        <p class="modal-intro">Toàn bộ vàng, cấp độ, cây trồng và vật nuôi sẽ bị xóa. Bạn chắc chắn muốn làm lại từ đầu chứ?</p>
+        <p class="modal-intro">Toàn bộ vàng, cấp độ, cây trồng và tiến trình sẽ bị xóa. Bạn chắc chắn muốn làm lại từ đầu chứ?</p>
         <div class="confirm-actions">
           <button class="btn btn-ghost" data-close>Giữ ván cũ</button>
           <button class="btn btn-gold" data-confirm-reset>Xóa và chơi lại</button>

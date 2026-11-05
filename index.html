@@ -176,20 +176,20 @@
             </span>
             <span>Trồng trọt</span>
           </button>
-          <button class="rail-btn" data-area="animals" title="Chăn nuôi">
+          <button class="rail-btn feature-hidden" data-area="animals" title="Chăn nuôi" aria-hidden="true">
             <span class="rail-ic">
               <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 18c0-7 5-11 12-11s12 4 12 11v11c0 7-5 11-12 11S12 36 12 29z" fill="#fffdf5" stroke="#5b3a1c" stroke-width="2.3"/><path d="M12 20c-4-3-6-8-3-11 4 1 6 4 6 8M36 20c4-3 6-8 3-11-4 1-6 4-6 8" fill="#e8d6ac" stroke="#5b3a1c" stroke-width="2.2"/><ellipse cx="24" cy="28" rx="9" ry="7" fill="#ffc2b4" stroke="#8a4b2e" stroke-width="1.6"/><circle cx="18" cy="20" r="2" fill="#3f2a16"/><circle cx="30" cy="20" r="2" fill="#3f2a16"/></svg>
             </span>
             <span>Chăn nuôi</span>
             <b id="animalReadyDot" class="rail-dot hidden"></b>
           </button>
-          <button class="rail-btn" data-area="fishing" title="Hồ cá">
+          <button class="rail-btn feature-hidden" data-area="fishing" title="Hồ cá" aria-hidden="true">
             <span class="rail-ic">
               <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 26c8-8 20-10 30-4-4 8-13 12-21 9z" fill="#7fd7e8" stroke="#24576b" stroke-width="2.3"/><path d="M8 26l-4-5v10z" fill="#54bce0" stroke="#24576b" stroke-width="2"/><circle cx="28" cy="23" r="2" fill="#24576b"/><path d="M22 14l6 7M22 37l6-7" stroke="#24576b" stroke-width="2.2" stroke-linecap="round"/></svg>
             </span>
             <span>Hồ cá</span>
           </button>
-          <button class="rail-btn" data-area="orchard" title="Vườn cây">
+          <button class="rail-btn feature-hidden" data-area="orchard" title="Vườn cây" aria-hidden="true">
             <span class="rail-ic">
               <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="26" r="14" fill="#e94b3c" stroke="#8f1f1a" stroke-width="2.3"/><path d="M24 14c-4-5-2-9 2-10 2 4 1 8-2 10z" fill="#6ec43d" stroke="#3d6d24" stroke-width="1.6"/><path d="M21 12c1-5 5-7 8-7" stroke="#7a4a20" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>
             </span>
@@ -363,43 +363,76 @@
       </div>
 
       <section id="plazaPage" class="plaza-page hidden" aria-labelledby="plazaTitle">
-        <div class="plaza-layout">
-          <header class="plaza-heading">
-            <div><h1 id="plazaTitle">Quảng trường</h1><p>Rạp chiếu ngoài trời của làng</p></div>
-            <span class="plaza-presence"><i aria-hidden="true"></i><span id="plazaOnline">0</span> người đang xem</span>
-            <button id="plazaBack" class="plaza-back">← Về vườn</button>
-          </header>
-          <div class="plaza-columns">
-            <section class="plaza-theatre" aria-label="Màn chiếu chung">
-              <div class="plaza-screen">
-                <div id="plazaPlayerMount"></div>
-                <div id="plazaPlaceholder" class="plaza-poster">
-                  <svg viewBox="0 0 54 54" aria-hidden="true"><circle cx="27" cy="27" r="25" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m23 18 15 9-15 9z" fill="currentColor"/></svg>
-                  <span>Màn chiếu đang chờ video</span>
-                </div>
-              </div>
-              <div class="plaza-caption">
-                <h2 id="plazaNowTitle">Chưa có video đang chiếu</h2><p id="plazaNowBy"></p>
-                <div class="plaza-play-actions">
-                  <button id="plazaLive" disabled title="Trở về vị trí đang chiếu của phòng">Xem cùng phòng</button>
-                  <button id="plazaSkip" disabled>Bình chọn bỏ qua</button>
-                  <button id="plazaRetry" class="hidden" hidden>Thử lại</button>
-                  <a id="plazaWatchLink" class="hidden" hidden target="_blank" rel="noopener noreferrer">Xem trên YouTube ↗</a>
-                </div>
-                <p id="plazaStatus" role="status" aria-live="polite"></p>
-              </div>
-            </section>
-            <aside class="plaza-program" aria-label="Chương trình chiếu">
-              <form id="plazaForm" autocomplete="off">
-                <label for="plazaInput">Chiếu video YouTube</label>
-                <input id="plazaInput" type="text" inputmode="url" placeholder="Dán liên kết hoặc mã video" maxlength="2048" required spellcheck="false" />
-                <button id="plazaAdd" type="submit">Thêm vào buổi chiếu</button>
-              </form>
-              <div class="plaza-queue-head"><h2>Hàng chờ</h2><span id="plazaQueueCount">0</span></div>
-              <ol id="plazaQueue"><li class="plaza-queue-empty">Chưa có video trong hàng chờ.</li></ol>
-            </aside>
+        <canvas id="plazaCinema" width="1920" height="1080" aria-hidden="true"></canvas>
+
+        <div class="plaza-status-pill">
+          <span class="plaza-pulse" aria-hidden="true"></span>
+          <b id="plazaStateText">Đang chiếu</b>
+          <i></i>
+          <span><b id="plazaOnline">0</b> người xem</span>
+          <i></i>
+          <span>Rạp chung của làng</span>
+        </div>
+
+        <section class="plaza-now-card" aria-label="Video đang chiếu">
+          <p class="plaza-eyebrow">TRÊN MÀN ẢNH</p>
+          <h2 id="plazaNowTitle">Chưa có video đang chiếu</h2>
+          <p id="plazaNowBy">Rạp đang chờ video đầu tiên.</p>
+          <div class="plaza-skip-row">
+            <button id="plazaSkip" class="plaza-skip-btn" disabled>
+              <span aria-hidden="true">▶</span><span id="plazaSkipLabel">Bỏ phiếu bỏ qua</span>
+            </button>
+            <span id="plazaSkipInfo">0/0 người đồng ý</span>
+          </div>
+          <div class="plaza-skip-track"><i id="plazaSkipFill"></i></div>
+        </section>
+
+        <div class="plaza-screen" aria-label="Màn chiếu chung">
+          <div id="plazaPlayerMount"></div>
+          <div id="plazaPlaceholder" class="plaza-poster">
+            <svg viewBox="0 0 54 54" aria-hidden="true"><circle cx="27" cy="27" r="25" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m23 18 15 9-15 9z" fill="currentColor"/></svg>
+            <span>Màn chiếu đang chờ video</span>
           </div>
         </div>
+
+        <nav class="plaza-dock" aria-label="Điều khiển quảng trường">
+          <button id="plazaQueueToggle" class="plaza-dock-btn" type="button" title="Mở hàng chờ">
+            <span class="pdb-ic" aria-hidden="true">🎞</span><span>Hàng chờ</span><b id="plazaQueueBadge">0</b>
+          </button>
+          <button id="plazaLive" class="plaza-dock-btn" type="button" disabled title="Trở về vị trí đang chiếu">
+            <span class="pdb-ic" aria-hidden="true">▶</span><span>Cùng phòng</span>
+          </button>
+          <button id="plazaRetry" class="plaza-dock-btn hidden" type="button">
+            <span class="pdb-ic" aria-hidden="true">↻</span><span>Thử lại</span>
+          </button>
+          <a id="plazaWatchLink" class="plaza-dock-btn hidden" target="_blank" rel="noopener noreferrer">
+            <span class="pdb-ic" aria-hidden="true">↗</span><span>YouTube</span>
+          </a>
+          <button id="plazaBack" class="plaza-dock-btn plaza-dock-back" type="button">
+            <span class="pdb-ic" aria-hidden="true">←</span><span>Về vườn</span>
+          </button>
+        </nav>
+
+        <aside id="plazaQueuePanel" class="plaza-queue-panel hidden" aria-label="Hàng chờ">
+          <header class="plaza-queue-head">
+            <div><small>CHƯƠNG TRÌNH CHIẾU</small><b>Hàng chờ</b></div>
+            <span id="plazaQueueCount">0</span>
+            <button id="plazaQueueClose" type="button" aria-label="Đóng hàng chờ">×</button>
+          </header>
+          <form id="plazaForm" autocomplete="off">
+            <label for="plazaInput">Chiếu video YouTube</label>
+            <input id="plazaInput" type="text" inputmode="url" placeholder="Dán liên kết hoặc mã video" maxlength="2048" required spellcheck="false" />
+            <button id="plazaAdd" type="submit">Thêm vào buổi chiếu</button>
+          </form>
+          <ol id="plazaQueue"><li class="plaza-queue-empty">Chưa có video trong hàng chờ.</li></ol>
+          <p class="plaza-queue-note">Video đầu phát ngay · tối đa 20 video · bỏ qua cần đa số người xem đồng ý.</p>
+        </aside>
+
+        <footer class="plaza-bottom">
+          <span class="plaza-bottom-brand">QUẢNG TRƯỜNG</span>
+          <p id="plazaStatus" role="status" aria-live="polite">Mở Hàng chờ để thêm video YouTube.</p>
+          <span class="plaza-bottom-hint">Chọn 🎞 để thêm video</span>
+        </footer>
       </section>
 
       <div id="visitScreen" class="visit-screen hidden" aria-label="Đến thăm vườn bạn">
@@ -497,8 +530,8 @@
           <button id="startAccountBtn" class="btn-link start-account-btn">👤 Đăng nhập / Đăng ký tài khoản</button>
           <div class="start-features">
             <span><i>🌱</i> Trồng trọt</span>
-            <span><i>🐄</i> Chăn nuôi</span>
-            <span><i>🎣</i> Câu cá</span>
+            <span><i>🎬</i> Quảng trường</span>
+            <span><i>👩‍🌾</i> Vườn bạn</span>
             <span><i>🏆</i> Nhiệm vụ</span>
           </div>
           <p class="start-note">Không cần cài đặt · Tự động lưu trên máy của bạn</p>
@@ -537,6 +570,7 @@
   <script src="assets/areas.js" defer></script>
   <script src="assets/audio.js" defer></script>
   <script src="assets/land.js" defer></script>
+  <script src="assets/plaza-cinema.js" defer></script>
   <script src="assets/plaza.js" defer></script>
   <script src="assets/game.js" defer></script>
   <script src="assets/account.js" defer></script>
