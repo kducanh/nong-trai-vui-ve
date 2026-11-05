@@ -22,6 +22,9 @@
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 .plaza-page.hidden { display: none !important; }
+#stage.plaza-mode .farm-rail,
+#stage.plaza-mode .planting-sidebar,
+#stage.plaza-mode .hud-bottom { display: none !important; }
 #plazaCinema {
   position: absolute;
   inset: 0;
@@ -71,9 +74,9 @@
 .plaza-now-card {
   position: absolute;
   z-index: 7;
-  left: 12.55em;
+  left: 1.2em;
   top: 7.15em;
-  width: 17.2em;
+  width: 15.3em;
   padding: .95em 1em .85em;
   border: 1px solid var(--cine-line);
   border-radius: .8em;
@@ -147,9 +150,9 @@
 .plaza-screen {
   position: absolute;
   z-index: 4;
-  left: 37.5%;
-  top: 20.14%;
-  width: 40.625%;
+  left: 22.656%;
+  top: 17.361%;
+  width: 54.688%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
   border: .25em solid #d9cfb0;
@@ -329,7 +332,7 @@
 .plaza-bottom {
   position: absolute;
   z-index: 7;
-  left: 12.55em;
+  left: 1.2em;
   right: 1.05em;
   bottom: .8em;
   display: flex;
@@ -364,17 +367,16 @@
 
 /* Responsive */
 @media (max-width: 1100px) {
-  .plaza-now-card { width: 15.4em; }
-  .plaza-screen { width: 43%; left: 35%; }
+  .plaza-now-card { width: 14.5em; }
   .plaza-dock { width: 4.9em; }
   .plaza-queue-panel { width: 19.5em; }
 }
 @media (max-width: 900px) {
   .plaza-status-pill { display: none; }
   .plaza-now-card {
-    left: 4.85em;
+    left: 1.2em;
     top: 5.45em;
-    width: 15em;
+    width: 14.5em;
     padding: .5em .65em .55em;
   }
   .plaza-now-card .plaza-eyebrow,
@@ -396,13 +398,13 @@
   .plaza-dock-btn { width: 3.7em; min-height: 3.05em; font-size: .47em; }
   .plaza-dock-back { margin-top: 0; }
   .plaza-queue-panel {
-    left: 4.9em;
+    left: 1.2em;
     right: .45em;
     top: 5.55em;
     bottom: 3.75em;
     width: auto;
   }
-  .plaza-bottom { left: 4.9em; right: .45em; bottom: .3em; min-height: 2.6em; }
+  .plaza-bottom { left: 1.2em; right: .45em; bottom: .3em; min-height: 2.6em; }
   .plaza-bottom-hint { display: none; }
   .plaza-poster span { font-size: .58em; }
 }

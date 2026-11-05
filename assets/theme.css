@@ -107,7 +107,7 @@ button { -webkit-tap-highlight-color: transparent; }
 /* Tools and seeds keep clear, consistent selected states. */
 .hud-bottom { bottom: .85em; gap: .55em; }
 .farm-controls { gap: .55em; }
-.seed-info, .seed-strip, .dock, .area-dock, .visit-bottom {
+.seed-info, .seed-strip, .dock, .visit-bottom {
   background: var(--panel); border: 1px solid #fffdf5; box-shadow: var(--panel-shadow); border-radius: 1em;
 }
 .seed-info { width: 15.4em; height: 3.65em; gap: .5em; padding: .3em .7em; }
@@ -293,15 +293,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .modal-close:hover { transform: scale(1.04); background: #e3e8d1; }
 .shop-card, .bag-card, .quest-card, .daily-card, .setting-row { border-color: #e2e1cc; background: #fffdf5; box-shadow: none; }
 .tooltip, .toast { background: #fffbed; border-color: #d9ddc6; box-shadow: var(--panel-shadow); color: #5a6a50; }
-.area-top { top: 6.3em; }
-.area-sign { background: var(--panel); border: 1px solid #fffdf4; border-radius: .85em; box-shadow: var(--panel-shadow); transform: none; padding: .6em 1em; }
-.area-sign h1 { color: #3e6349; font-family: Georgia, 'Times New Roman', serif; font-size: 1.4em; }
-.area-sign small { color: #8d8d6e; }
-.area-sign p { color: #7b8367; margin-top: .25em; }
-.area-back, .visit-back, .visit-btn { background: #f9f8e9; border: 1px solid #e6e8d2; box-shadow: 0 .1em .4em #345b4615; color: #59704f; }
-.area-dock { padding: .7em .9em; }
-.animal-pick { border-color: #dce2ca; background: #f5f5e7; }
-.animal-pick.active { background: #e6edcf; border-color: #aebf8e; box-shadow: none; }
+.visit-back, .visit-btn { background: #f9f8e9; border: 1px solid #e6e8d2; box-shadow: 0 .1em .4em #345b4615; color: #59704f; }
 .visit-topbar { background: var(--panel); border-bottom: 1px solid #e1e4ce; box-shadow: var(--panel-shadow); }
 .visit-btn.gold { background: #ebcc88; color: #6e5730; }
 
@@ -324,7 +316,6 @@ button { -webkit-tap-highlight-color: transparent; }
   .rail-btn span:not(.rail-ic) { display: none; }
   .garden-caption { top: 5.7em; }
   .garden-caption b { font-size: 1.3em; }
-  .area-top { top: 5.65em; left: 5em; }
   .mini-chips .chip { font-size: .64em; padding: 0 .45em; }
   .topbar-right { gap: .3em; }
   .account-btn { font-size: .62em; }
@@ -381,5 +372,3 @@ button { -webkit-tap-highlight-color: transparent; }
   .start-note { margin-top: .8em; }
   .start-footer { bottom: 1.15em; }
 }
-
-.rail-btn.feature-hidden { display: none !important; }

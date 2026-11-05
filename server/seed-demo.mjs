@@ -57,17 +57,11 @@ function stateFor(name, coins, level, crops) {
     settings: { sound: true, music: true },
     plots,
     seeds: { carrot: 4, tomato: 2, corn: 1 },
-    inventory: { fertilizer: 2, hay: 3 },
-    animals: [
-      { id: 'cow', type: 'cow', name: 'Bò Sữa', x: 804, y: 322, homeX: 804, homeY: 322, dir: -1, phase: 0.4, state: 'hungry', fedAt: 0, readyAt: 0, moving: false, waitUntil: now + 2600, targetX: 804, targetY: 322 },
-      { id: 'hen1', type: 'chicken', name: 'Gà Mơ', x: 758, y: 344, homeX: 758, homeY: 344, dir: 1, phase: 1.7, state: 'hungry', fedAt: 0, readyAt: 0, moving: false, waitUntil: now + 3600, targetX: 758, targetY: 344 },
-      { id: 'hen2', type: 'chicken', name: 'Gà Bông', x: 878, y: 346, homeX: 878, homeY: 346, dir: -1, phase: 3.2, state: 'hungry', fedAt: 0, readyAt: 0, moving: false, waitUntil: now + 5200, targetX: 878, targetY: 346 }
-    ],
-    tree: { readyAt: now - 1000, shakeUntil: 0 },
+    inventory: { fertilizer: 2 },
     mail: { lastClaim: 0 },
     friends: {},
     quests: { chainIndex: 1, chainProgress: 2, chainDone: false, dailyDate: '', daily: [], dailyProgress: [] },
-    stats: { till: 3, plant: 8, water: 12, harvest: 5, sell: 3, feed: 2, fish: 1, buySeed: 4 }
+    stats: { till: 3, plant: 8, water: 12, harvest: 5, sell: 3, buySeed: 4 }
   };
 }
 

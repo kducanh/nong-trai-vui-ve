@@ -4,7 +4,7 @@ Một bản dựng lại fan-made của tựa game nông trại tuổi thơ, l�
 
 > Mã nguồn: **https://github.com/kducanh/nong-trai-vui-ve**
 
-Lần cập nhật này tập trung vào **Trồng trọt**, **Quảng trường** và **Vườn bạn**. Ba khu **Chăn nuôi · Hồ cá · Vườn cây** đang được **tạm ẩn** để hoàn thiện ở giai đoạn sau; code vẫn được giữ nguyên, chỉ ẩn khỏi giao diện.
+Lần cập nhật này tập trung vào **Trồng trọt**, **Quảng trường** và **Vườn bạn**. Ba khu **Chăn nuôi · Hồ cá · Vườn cây** đã được gỡ khỏi giao diện, trang khu vực và các luồng mở; sẽ được thiết kế lại ở giai đoạn sau.
 
 ![Màn hình bắt đầu](screenshots/start.png)
 
@@ -74,7 +74,7 @@ Mỗi mục mở một khu vực riêng, không còn dồn hết lên màn hình
 
 - **Trồng trọt** là trang mặc định, chỉ có ruộng rau, nhà dụng cụ, bù nhìn và các luống đất.
 - **Quảng trường** là rạp chiếu tối kiểu 3D dùng chung hàng đợi YouTube.
-- **Chăn nuôi, Hồ cá, Vườn cây** đang **tạm ẩn**; mã nguồn vẫn còn để mở lại ở giai đoạn sau.
+- **Chăn nuôi, Hồ cá, Vườn cây** đã được gỡ khỏi thanh khu vực và toàn bộ luồng mở; sẽ làm lại ở giai đoạn sau.
 - Thẻ **“Việc đang làm”** bên trái luôn nhắc mục tiêu tiếp theo; bấm vào để mở Nhiệm vụ.
 
 ---
@@ -97,9 +97,9 @@ Mỗi mục mở một khu vực riêng, không còn dồn hết lên màn hình
 
 ---
 
-## 🐄 Chăn nuôi · 🎣 Hồ cá · 🌳 Vườn cây — tạm ẩn
+## 🐄 Chăn nuôi · 🎣 Hồ cá · 🌳 Vườn cây — đã gỡ khỏi giao diện
 
-Ba khu vực này đã được gỡ khỏi thanh điều hướng ở giai đoạn hiện tại để tập trung vào Trồng trọt, Quảng trường và Vườn bạn. Code cảnh, logic và API vẫn được giữ trong `assets/areas.js`, `assets/game.js` để mở lại sau. Các nhiệm vụ ngày và chuỗi nhiệm vụ liên quan cũng đã được thay bằng nhiệm vụ làm vườn để không bị kẹt.
+Ba khu vực này đã được gỡ khỏi thanh điều hướng, trang khu vực, nút mở và các hàm xử lý liên quan để tránh vô tình mở ra. Toàn bộ nhiệm vụ ngày/chuỗi nhiệm vụ liên quan cũng đã được thay bằng nhiệm vụ làm vườn. Khi làm lại ở giai đoạn sau, các khu này sẽ được thiết kế mới thay vì khôi phục code cũ.
 
 ---
 
@@ -123,6 +123,7 @@ Mở **Vườn bạn** trên thanh menu để ghé thăm vườn của 3 ngườ
 
 Mở **Quảng trường** ở cột bên trái để vào rạp chiếu tối kiểu **wetube ciné 3D**: phòng tối, màn chiếu viền vàng, 100 ghế phối cảnh, đèn lối đi, quả cầu disco và các tia laser. Giao diện lấy cảm hứng từ dự án [wetube-cine-3d](https://github.com/kducanh/wetube-cine-3d) của tác giả.
 
+- Khi vào rạp, thanh khu vực nông trại được ẩn để màn hình rộng hơn; nút **Về vườn** nằm trong dock bên phải.
 - Mọi người trong cùng phòng dùng **một hàng đợi và một mốc thời gian phát**.
 - Dán liên kết hoặc mã video YouTube vào ô nhập; server chỉ nhận **11 ký tự ID** hợp lệ.
 - Hàng đợi tối đa **20 video**; video đầu phát ngay, các video sau xếp hàng.
@@ -236,13 +237,11 @@ F:\nongtrai
 │   ├── plaza.js        # quảng trường YouTube phía client
 │   ├── plaza-cinema.js # nền rạp 2.5D (ghế, đèn, màn chiếu)
 │   ├── plaza.css
-│   ├── plaza-night.svg
 │   ├── account.css     # tài khoản, bạn bè, chat
 │   ├── admin.css       # giao diện quản trị
 │   ├── art.js          # cảnh tĩnh của nông trại
 │   ├── sprites.js      # cây trồng, con vật, icon, hiệu ứng
 │   ├── friend.js       # vẽ cảnh vườn bạn bè
-│   ├── areas.js        # vẽ cảnh chuồng thú, hồ cá, vườn táo
 │   ├── audio.js        # nhạc nền + SFX tổng hợp
 │   ├── game.js         # luật chơi, submenu, tương tác, lưu game
 │   ├── account.js      # đăng nhập, bạn bè, chat, đồng bộ save

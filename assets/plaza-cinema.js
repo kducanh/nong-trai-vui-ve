@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const W = 1280, H = 720;
-  const SCREEN = { x: 480, y: 145, w: 520, h: 293 };
+  const SCREEN = { x: 290, y: 125, w: 700, h: 394 };
   const canvas = document.getElementById('plazaCinema');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
@@ -65,7 +65,7 @@
     ctx.closePath(); ctx.fill();
 
     // Ánh sáng viền tường
-    for (const x of [206, 1074]) {
+    for (const x of [140, 1140]) {
       const g = ctx.createLinearGradient(x - 7, 0, x + 7, 0);
       g.addColorStop(0, 'rgba(200,169,106,0)');
       g.addColorStop(0.5, 'rgba(244,215,157,.60)');
@@ -84,7 +84,7 @@
     floor.addColorStop(1, '#090b07');
     ctx.fillStyle = floor;
     ctx.beginPath();
-    ctx.moveTo(540, 430); ctx.lineTo(740, 430); ctx.lineTo(1160, 720); ctx.lineTo(120, 720);
+    ctx.moveTo(SCREEN.x, SCREEN.y + SCREEN.h); ctx.lineTo(SCREEN.x + SCREEN.w, SCREEN.y + SCREEN.h); ctx.lineTo(1160, 720); ctx.lineTo(120, 720);
     ctx.closePath(); ctx.fill();
 
     // Đèn lối đi
@@ -105,7 +105,7 @@
     // Sân khấu
     ctx.fillStyle = '#1a1c13';
     ctx.beginPath();
-    ctx.moveTo(520, 438); ctx.lineTo(760, 438); ctx.lineTo(855, 478); ctx.lineTo(425, 478);
+    ctx.moveTo(SCREEN.x + 40, 527); ctx.lineTo(SCREEN.x + SCREEN.w - 40, 527); ctx.lineTo(SCREEN.x + SCREEN.w + 55, 560); ctx.lineTo(SCREEN.x - 55, 560);
     ctx.closePath(); ctx.fill();
     ctx.strokeStyle = 'rgba(217,240,138,.14)';
     ctx.lineWidth = 1.5;
@@ -134,18 +134,18 @@
 
     // Rèm nhung hai bên màn chiếu
     for (const side of [-1, 1]) {
-      const x = side < 0 ? 416 : 1004;
+      const x = side < 0 ? SCREEN.x - 64 : SCREEN.x + SCREEN.w + 6;
       const g = ctx.createLinearGradient(x, 0, x + 58, 0);
       g.addColorStop(0, 'rgba(57,22,19,.30)');
       g.addColorStop(0.45, 'rgba(104,38,30,.82)');
       g.addColorStop(1, 'rgba(35,14,12,.30)');
       ctx.fillStyle = g;
       ctx.beginPath();
-      ctx.moveTo(x, 154);
-      ctx.lineTo(x + 58, 154);
-      ctx.quadraticCurveTo(x + 38, 300, x + 58, 438);
-      ctx.lineTo(x, 438);
-      ctx.quadraticCurveTo(x + 18, 300, x, 154);
+      ctx.moveTo(x, SCREEN.y + 9);
+      ctx.lineTo(x + 58, SCREEN.y + 9);
+      ctx.quadraticCurveTo(x + 38, SCREEN.y + SCREEN.h / 2, x + 58, SCREEN.y + SCREEN.h + 9);
+      ctx.lineTo(x, SCREEN.y + SCREEN.h + 9);
+      ctx.quadraticCurveTo(x + 18, SCREEN.y + SCREEN.h / 2, x, SCREEN.y + 9);
       ctx.closePath();
       ctx.fill();
       ctx.globalAlpha = .22;
@@ -153,17 +153,17 @@
       ctx.lineWidth = 1.2;
       for (let i = 1; i < 5; i++) {
         ctx.beginPath();
-        ctx.moveTo(x + i * 11, 160);
-        ctx.quadraticCurveTo(x + i * 8, 300, x + i * 11, 430);
+        ctx.moveTo(x + i * 11, SCREEN.y + 15);
+        ctx.quadraticCurveTo(x + i * 8, SCREEN.y + SCREEN.h / 2, x + i * 11, SCREEN.y + SCREEN.h + 1);
         ctx.stroke();
       }
       ctx.globalAlpha = 1;
     }
 
     // Loa hai bên sân khấu
-    for (const x of [438, 1022]) {
+    for (const x of [SCREEN.x - 42, SCREEN.x + SCREEN.w + 16]) {
       ctx.fillStyle = '#11150e';
-      rr(ctx, x, 252, 26, 154, 4);
+      rr(ctx, x, SCREEN.y + 105, 26, 180, 4);
       ctx.fill();
       ctx.strokeStyle = 'rgba(200,169,106,.22)';
       ctx.lineWidth = 1;
@@ -171,7 +171,7 @@
       ctx.fillStyle = 'rgba(200,169,106,.16)';
       for (let i = 0; i < 3; i++) {
         ctx.beginPath();
-        ctx.arc(x + 13, 282 + i * 35, 7 - i, 0, Math.PI * 2);
+        ctx.arc(x + 13, SCREEN.y + 140 + i * 38, 7 - i, 0, Math.PI * 2);
         ctx.fill();
       }
     }
@@ -179,23 +179,23 @@
     // Đèn sân khấu
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
-    for (const x of [300, 520, 760, 980]) {
-      const cg = ctx.createLinearGradient(x, 105, x, 470);
+    for (const x of [SCREEN.x - 120, SCREEN.x + 100, SCREEN.x + SCREEN.w - 100, SCREEN.x + SCREEN.w + 120]) {
+      const cg = ctx.createLinearGradient(x, 105, x, 560);
       cg.addColorStop(0, 'rgba(244,232,178,.14)');
       cg.addColorStop(1, 'rgba(244,232,178,0)');
       ctx.fillStyle = cg;
       ctx.beginPath();
       ctx.moveTo(x - 9, 105);
       ctx.lineTo(x + 9, 105);
-      ctx.lineTo(x + 120, 470);
-      ctx.lineTo(x - 120, 470);
+      ctx.lineTo(x + 120, 560);
+      ctx.lineTo(x - 120, 560);
       ctx.closePath();
       ctx.fill();
     }
     ctx.restore();
 
     // Quả cầu disco + tia laser
-    const bx = 740, by = 122;
+    const bx = SCREEN.x + SCREEN.w / 2, by = 122;
     ctx.save();
     ctx.strokeStyle = 'rgba(201,233,255,.22)';
     ctx.lineWidth = 1;
@@ -221,13 +221,13 @@
     // 100 ghế: 10 hàng x 10, phối cảnh
     // Vẽ từ hàng xa đến gần để hàng trước che chân hàng sau.
     for (let row = 0; row <= 9; row++) {
-      const y = 474 + row * 22;
-      const span = 780 + row * 30;
-      const aisle = 34 + row * 2;
-      const gap = 4 + row * .3;
+      const y = 527 + row * 16.5;
+      const span = 740 + row * 34;
+      const aisle = 28 + row * 2;
+      const gap = 3 + row * .25;
       const seatW = (span - aisle - gap * 9) / 10;
       const start = px - span / 2;
-      const seatH = 13 + row * 2.5;
+      const seatH = 9 + row * 1.6;
       // Lối đi tối giữa hai dãy ghế
       const aisleX = start + 5 * (seatW + gap);
       ctx.fillStyle = 'rgba(217,240,138,.035)';

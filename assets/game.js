@@ -16,20 +16,10 @@
   const visitScreen = $('#visitScreen');
   const friendCanvas = $('#friendCanvas');
   const friendCtx = friendCanvas.getContext('2d');
-  const areaPage = $('#areaPage');
   const plazaPage = $('#plazaPage');
-  const areaCanvas = $('#areaCanvas');
-  const areaCtx = areaCanvas.getContext('2d');
-  const areaDock = $('#areaDock');
-  const areaTitle = $('#areaTitle');
-  const areaKicker = $('#areaKicker');
-  const areaSubtitle = $('#areaSubtitle');
-  const areaRes = $('#areaRes');
   const RENDER_SCALE = 1.5;
   let visitOpen = false;
   let farmArea = 'garden';
-  let selectedAnimalId = 'cow';
-  let areaRefreshTimer = null;
   let visitFriendId = 'lan';
   let friendSpeech = null;
   let friendHoverIndex = -1;
@@ -45,7 +35,6 @@
   const VERSION = 1;
   const REGEN_MS = 8500;
   const MAIL_COOLDOWN = 20 * 3600 * 1000;
-  const TREE_COOLDOWN = 75 * 1000;
   const params = new URLSearchParams(location.search);
   const AUTO_PLAY = params.has('play');
   const FRESH = params.has('fresh');
@@ -67,18 +56,10 @@
   CROP_IDS.forEach(id => {
     GOODS[id] = { name: CROPS[id].name, sell: CROPS[id].sell, icon: id, crop: true };
   });
-  Object.assign(GOODS, {
-    milk: { name: 'Sữa bò', sell: 80, icon: 'milk' },
-    egg: { name: 'Trứng gà', sell: 45, icon: 'egg' },
-    fish: { name: 'Cá chép', sell: 65, icon: 'fish' },
-    goldfish: { name: 'Cá vàng', sell: 130, icon: 'goldfish' },
-    apple: { name: 'Táo đỏ', sell: 25, icon: 'apple' }
-  });
   const GOOD_IDS = Object.keys(GOODS);
 
   const SUPPLIES = {
-    fertilizer: { name: 'Phân bón', price: 25, icon: 'fertilizer', blurb: 'Thêm 1 nông sản khi thu hoạch.' },
-    hay: { name: 'Cỏ khô', price: 12, icon: 'hay', blurb: 'Cho bò và gà ăn no.' }
+    fertilizer: { name: 'Phân bón', price: 25, icon: 'fertilizer', blurb: 'Thêm 1 nông sản khi thu hoạch.' }
   };
   const ENERGY_ITEM = { name: 'Nước tăng lực', price: 150, icon: 'energy', blurb: 'Hồi ngay 15 năng lượng.' };
 
@@ -179,11 +160,6 @@
     const plots = Array.from({ length: 12 }, (_, i) => ({
       unlocked: LAND.initiallyUnlocked(i), tilled: false, crop: null, startedAt: 0, growMs: 0, watered: false, fertilized: false, progress: 0
     }));
-    const animals = [
-      { id: 'cow', type: 'cow', name: 'Bò Sữa', x: 804, y: 322, homeX: 804, homeY: 322, dir: -1, phase: 0.4, state: 'hungry', fedAt: 0, readyAt: 0, moving: false, waitUntil: t + 2600, targetX: 804, targetY: 322 },
-      { id: 'hen1', type: 'chicken', name: 'Gà Mơ', x: 758, y: 344, homeX: 758, homeY: 344, dir: 1, phase: 1.7, variant: 0, state: 'hungry', fedAt: 0, readyAt: 0, moving: false, waitUntil: t + 3600, targetX: 758, targetY: 344 },
-      { id: 'hen2', type: 'chicken', name: 'Gà Bông', x: 878, y: 346, homeX: 878, homeY: 346, dir: -1, phase: 3.2, variant: 1, state: 'hungry', fedAt: 0, readyAt: 0, moving: false, waitUntil: t + 5200, targetX: 878, targetY: 346 }
-    ];
     return {
       version: VERSION,
       createdAt: t,
@@ -194,13 +170,11 @@
       settings: { sound: true, music: true },
       plots,
       seeds: { carrot: 4, tomato: 2 },
-      inventory: { fertilizer: 2, hay: 3 },
-      animals,
-      tree: { readyAt: 0, shakeUntil: 0 },
+      inventory: { fertilizer: 2 },
       mail: { lastClaim: 0 },
       friends: freshFriends(),
       quests: { chainIndex: 0, chainProgress: 0, chainDone: false, dailyDate: '', daily: [], dailyProgress: [] },
-      stats: { till: 0, plant: 0, water: 0, harvest: 0, sell: 0, feed: 0, fish: 0, buySeed: 0 }
+      stats: { till: 0, plant: 0, water: 0, harvest: 0, sell: 0, buySeed: 0 }
     };
   }
 
@@ -220,7 +194,6 @@
     s.stats = Object.assign({}, s.stats, saved.stats || {});
     s.inventory = Object.assign({}, s.inventory, saved.inventory || {});
     s.seeds = Object.assign({}, s.seeds, saved.seeds || {});
-    s.tree = Object.assign({}, s.tree, saved.tree || {});
     s.mail = Object.assign({}, s.mail, saved.mail || {});
     s.friends = freshFriends();
     Object.keys(saved.friends || {}).forEach(id => {
@@ -252,24 +225,13 @@
       if (!p.fertilized) p.fertilized = false;
       return p;
     });
-    s.animals = s.animals.map((a, i) => {
-      const sa = saved.animals && saved.animals[i];
-      const out = Object.assign({}, a, sa || {});
-      if (out.state === 'producing' && out.readyAt && now() >= out.readyAt) out.state = 'ready';
-      if (!['hungry', 'producing', 'ready'].includes(out.state)) out.state = 'hungry';
-      out.moving = false;
-      out.waitUntil = now() + 1500 + i * 1100;
-      out.targetX = out.x;
-      out.targetY = out.y;
-      return out;
-    });
     s.quests = Object.assign({}, s.quests, saved.quests || {});
     s.quests.chainIndex = clamp(Math.round(s.quests.chainIndex || 0), 0, CHAIN.length);
     if (s.quests.chainIndex >= CHAIN.length) s.quests.chainDone = true;
     s.quests.chainProgress = Math.max(0, s.quests.chainProgress || 0);
     s.quests.dailyProgress = Array.isArray(s.quests.dailyProgress) ? s.quests.dailyProgress : [];
     s.quests.daily = Array.isArray(s.quests.daily) ? s.quests.daily : [];
-    // Chăn nuôi / Hồ cá đang tạm ẩn: bỏ nhiệm vụ cũ liên quan để không bị kẹt.
+    // Dọn nhiệm vụ cũ không còn khu vực tương ứng để không bị kẹt.
     if (s.quests.daily.some(d => d && (d.type === 'feed' || d.type === 'fish'))) {
       s.quests.daily = [];
       s.quests.dailyProgress = [];
@@ -303,7 +265,6 @@
   let landPlotIndex = null;
   let hover = null;
   let pointer = { x: 0, y: 0 };
-  let fishing = { phase: null, biteAt: 0, until: 0 };
   let particles = [];
   let floaters = [];
   let lastFrame = performance.now();
@@ -558,7 +519,7 @@
     seedInfoName: $('#seedInfoName'), seedInfoMeta: $('#seedInfoMeta'),
     seedInfoCount: $('#seedInfoCount'), seedInfoIcon: $('#seedInfoIcon'),
     farmTaskText: $('#farmTaskText'), farmTaskFill: $('#farmTaskFill'), farmTaskCount: $('#farmTaskCount'),
-    friendsDot: $('#friendsDot'), animalReadyDot: $('#animalReadyDot'), orchardReadyDot: $('#orchardReadyDot'),
+    friendsDot: $('#friendsDot'),
     waterAllBtn: $('#waterAllBtn'), waterAllCount: $('#waterAllCount'),
     harvestAllBtn: $('#harvestAllBtn'), harvestAllCount: $('#harvestAllCount'),
     visitCoinText: $('#visitCoinText'), visitEnergyText: $('#visitEnergyText'),
@@ -598,8 +559,6 @@
     updateFarmUI();
     updateVisitWallet();
     if (el.friendsDot) el.friendsDot.classList.toggle('hidden', !friendAnyAvailable());
-    if (el.animalReadyDot) el.animalReadyDot.classList.toggle('hidden', !state.animals.some(a => animalReady(a)));
-    if (el.orchardReadyDot) el.orchardReadyDot.classList.toggle('hidden', !treeReady());
   }
 
   function updateToolUI() {
@@ -1042,7 +1001,7 @@
   function chatFriend() {
     const lines = {
       lan: ['Cảm ơn bạn ghé thăm! Vườn dâu nhà mình sắp chín rồi.', 'Bạn có bí quyết trồng cà chua không? Chỉ mình với!', 'Mai mình sang vườn bạn chơi nhé!'],
-      minh: ['Bắp nhà mình năm nay cao quá, sắp bằng mái nhà rồi!', 'Bạn tưới giúp mình một luống nhé, mình cảm ơn nhiều.', 'Câu cá ở hồ nhà bạn vui lắm, hôm nào cho mình qua với!'],
+      minh: ['Bắp nhà mình năm nay cao quá, sắp bằng mái nhà rồi!', 'Bạn tưới giúp mình một luống nhé, mình cảm ơn nhiều.', 'Vườn rau nhà bạn xanh quá, hôm nào cho mình qua học hỏi với!'],
       batu: ['Cháu ngoan quá, đến thăm bà là bà vui rồi.', 'Bà vừa làm bánh khoai, lát nữa cháu cầm về nhé.', 'Đất vườn này bà trồng từ hồi cháu còn bé tí đấy.']
     }[visitFriendId] || [FRIENDS[visitFriendId]?.greeting || 'Chào bạn, cảm ơn đã ghé thăm!'];
     const line = lines[Math.floor(Math.random() * lines.length)];
@@ -1152,56 +1111,6 @@
     return ART.layout.plotCenter(i % 4, Math.floor(i / 4));
   }
 
-  function updateAnimals(dt) {
-    const t = now();
-    const bounds = { x1: 664, x2: 896, y1: 266, y2: 344 };
-    state.animals.forEach(a => {
-      if (a.state === 'producing' && a.readyAt && t >= a.readyAt) a.state = 'ready';
-      if (a.moving) {
-        const dx = a.targetX - a.x, dy = a.targetY - a.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist < 2) {
-          a.moving = false;
-          a.waitUntil = t + 2400 + Math.random() * 5000;
-        } else {
-          const speed = (a.type === 'cow' ? 12 : 22) * dt;
-          a.x += dx / dist * Math.min(speed, dist);
-          a.y += dy / dist * Math.min(speed, dist);
-          if (Math.abs(dx) > 0.5) a.dir = dx > 0 ? 1 : -1;
-          a._walk = true;
-        }
-      } else {
-        if (t > a.waitUntil) {
-          if (Math.random() < 0.65) {
-            a.targetX = bounds.x1 + Math.random() * (bounds.x2 - bounds.x1);
-            a.targetY = bounds.y1 + Math.random() * (bounds.y2 - bounds.y1);
-            if (a.type === 'cow' && a.targetY < 290) a.targetY = 290 + Math.random() * 40;
-            a.moving = true;
-            a.waitUntil = t + 12000 + Math.random() * 6000;
-          } else {
-            a.waitUntil = t + 2600 + Math.random() * 4200;
-          }
-        }
-      }
-      a.moving = !!a.moving;
-    });
-  }
-
-  function updateFishing() {
-    const t = now();
-    if (!fishing.phase) return;
-    if (fishing.phase === 'wait' && t >= fishing.biteAt) {
-      fishing.phase = 'bite';
-      fishing.until = t + 1800;
-      GameAudio.sfx('splash');
-      addParticles(L.pond.x, L.pond.y - 40, 'drop', '#bdf4ff', 8, 35);
-    } else if (fishing.phase === 'bite' && t >= fishing.until) {
-      fishing.phase = null;
-      toast('Cá đã bơi mất rồi! Thử lại nhé.', 'err', 2600);
-      GameAudio.sfx('error');
-    }
-  }
-
   function updateParticles(dt) {
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
@@ -1283,9 +1192,6 @@
     ctx.globalAlpha = 1;
   }
 
-  function treeReady() {
-    return now() >= (state.tree.readyAt || 0);
-  }
   function mailReady() {
     return now() - (state.mail.lastClaim || 0) >= MAIL_COOLDOWN;
   }
@@ -1327,13 +1233,10 @@
   function frame(ts) {
     const dt = Math.min(0.05, (ts - lastFrame) / 1000);
     lastFrame = ts;
-    updateAnimals(dt);
-    if (!visitOpen) updateFishing();
     updateParticles(dt);
     state.plots.forEach(p => { if (p.crop) p.progress = plotProgress(p); });
     if (visitOpen) drawFriendFrame(ts / 1000);
     else if (farmArea === 'garden') drawWorld(ts / 1000);
-    else if (farmArea !== 'plaza') drawAreaFrame(ts / 1000);
     requestAnimationFrame(frame);
   }
 
@@ -1348,10 +1251,6 @@
       return m + ' phút' + (r ? ' ' + r + ' giây' : '');
     }
     return s + ' giây';
-  }
-
-  function animalReady(a) {
-    return a.state === 'ready' || (a.state === 'producing' && a.readyAt && now() >= a.readyAt);
   }
 
   function targetAt(x, y) {
@@ -1404,24 +1303,6 @@
       }
       return `<b>${c.name}</b><div class="tt-meta">${flags}</div><div class="tt-meta">Còn khoảng ${fmtTime(left)} nữa.</div><span class="tt-hint">${currentTool === 'water' ? (p.watered ? 'Đã tưới rồi.' : 'Click để tưới mát cho cây.') : currentTool === 'fertilize' ? (p.fertilized ? 'Đã bón phân.' : 'Click để bón thêm dinh dưỡng.') : 'Tưới nước và bón phân để cây lớn nhanh.'}</span>`;
     }
-    if (target.kind === 'animal') {
-      const a = target.animal;
-      const ready = animalReady(a);
-      if (ready) {
-        return `<b>${a.name}</b><div class="tt-meta">${a.type === 'cow' ? 'Bò đã cho sữa thơm.' : 'Gà vừa đẻ trứng.'}</div><span class="tt-hint tt-done">Mở chuồng thú để thu hoạch.</span>`;
-      }
-      if (a.state === 'producing') {
-        return `<b>${a.name}</b><div class="tt-meta">Đang chăm chỉ cho sản phẩm...</div><span class="tt-hint">Mở chuồng thú để xem tiến độ.</span>`;
-      }
-      return `<b>${a.name}</b><div class="tt-meta">Đang đói bụng, kêu ụt ịt.</div><span class="tt-hint">Mở chuồng thú để cho ăn.</span>`;
-    }
-    if (target.kind === 'pond') {
-      return `<b>Hồ cá mát lạnh</b><div class="tt-meta">Nước trong veo, có cá chép và cá vàng.</div><span class="tt-hint">Click để mở Hồ cá và thả câu.</span>`;
-    }
-    if (target.kind === 'tree') {
-      if (treeReady()) return `<b>Cây táo</b><div class="tt-meta">Cành nào cũng sai trĩu quả.</div><span class="tt-hint tt-done">Mở vườn cây để hái táo.</span>`;
-      return `<b>Cây táo</b><div class="tt-meta">Táo đang chín dần trên cành.</div><span class="tt-hint">Mở vườn cây để xem thời gian chín.</span>`;
-    }
     if (target.kind === 'mailbox') {
       if (mailReady()) return `<b>Hòm thư làng</b><div class="tt-meta">Có một lá thư mới gửi cho bạn!</div><span class="tt-hint tt-done">Click để mở thư và nhận quà.</span>`;
       return `<b>Hòm thư làng</b><div class="tt-meta">Hôm nay chưa có thư mới.</div><span class="tt-hint">Thư tiếp theo sau ${fmtTime(MAIL_COOLDOWN - (now() - state.mail.lastClaim))}.</span>`;
@@ -1463,10 +1344,6 @@
       return;
     }
     canvas.style.cursor = 'pointer';
-    if (target.kind === 'pond' && fishing.phase) {
-      hideTooltip();
-      return;
-    }
     placeTooltip(tooltipFor(target), target.x, target.y);
   }
 
@@ -1490,14 +1367,10 @@
     const x = (e.clientX - r.left) / r.width * 1280;
     const y = (e.clientY - r.top) / r.height * 720;
     pointer = { x, y };
-    if (fishing.phase === 'bite') { catchFish(); return; }
     const target = targetAt(x, y);
     if (!target) return;
     GameAudio.resume();
     if (target.kind === 'plot') actPlot(target.index);
-    else if (target.kind === 'animal') openAnimals();
-    else if (target.kind === 'pond') openFishing();
-    else if (target.kind === 'tree') openOrchard();
     else if (target.kind === 'mailbox') openMail();
     else if (target.kind === 'barn') openBag();
     updateHUD();
@@ -1794,110 +1667,6 @@
     }
   }
 
-  /* ---------------- động vật ---------------- */
-  function interactAnimal(a) {
-    if (animalReady(a)) {
-      if (a.state === 'producing') a.state = 'ready';
-      const isCow = a.type === 'cow';
-      const id = isCow ? 'milk' : 'egg';
-      const qty = isCow ? (Math.random() < 0.18 ? 2 : 1) : 1;
-      state.inventory[id] = (state.inventory[id] || 0) + qty;
-      a.state = 'hungry';
-      a.fedAt = 0;
-      a.readyAt = 0;
-      addXp(isCow ? 7 : 4);
-      addParticles(a.x, a.y - 50, 'heart', '#ff9aa2', 9, 30);
-      addFloater(a.x, a.y - 92, '+' + qty + ' ' + GOODS[id].name, '#fff3b0');
-      GameAudio.sfx('collect');
-      if (isCow) GameAudio.sfx('moo');
-      save();
-      updateHUD();
-      refreshHover();
-      if (modalType === 'animals') refreshModal();
-      return;
-    }
-    if (a.state === 'producing') {
-      toast(`${a.name} đang chăm chỉ lắm, còn ${fmtTime(Math.max(0, a.readyAt - now()))} nữa.`, '', 2400);
-      return;
-    }
-    if ((state.inventory.hay || 0) <= 0) {
-      toast('Đã hết cỏ khô. Mua thêm trong Shop (Vật tư) nhé!', 'err');
-      GameAudio.sfx('error');
-      return;
-    }
-    if (!spendEnergy(1)) return;
-    state.inventory.hay--;
-    a.state = 'producing';
-    a.fedAt = now();
-    a.readyAt = now() + (a.type === 'cow' ? 30000 : 22000);
-    track('feed', 1);
-    addXp(2);
-    addParticles(a.x, a.y - 20, 'heart', '#ffb8a4', 7, 26);
-    addFloater(a.x, a.y - 84, 'Măm măm!', '#fff1c4');
-    GameAudio.sfx('feed');
-    GameAudio.sfx(a.type === 'cow' ? 'moo' : 'cluck');
-    save();
-    updateHUD();
-    refreshHover();
-    if (modalType === 'animals') refreshModal();
-  }
-
-  /* ---------------- câu cá ---------------- */
-  function handlePond() {
-    if (fishing.phase === 'bite') { catchFish(); return; }
-    if (fishing.phase === 'wait') {
-      toast('Suỵt... cá đang tới gần, kiên nhẫn nhé!', '', 2000);
-      return;
-    }
-    if (fishing.phase) return;
-    if (!spendEnergy(2)) return;
-    fishing.phase = 'wait';
-    fishing.biteAt = now() + 2200 + Math.random() * 2600;
-    fishing.until = 0;
-    GameAudio.sfx('water');
-    addFloater(L.pond.x - 10, L.pond.y - 80, 'Thả câu...', '#d8fff8');
-    refreshHover();
-  }
-
-  function catchFish() {
-    if (fishing.phase !== 'bite') return;
-    fishing.phase = null;
-    const gold = Math.random() < 0.14;
-    const id = gold ? 'goldfish' : 'fish';
-    state.inventory[id] = (state.inventory[id] || 0) + 1;
-    addXp(6);
-    track('fish', 1);
-    addParticles(L.pond.x, L.pond.y - 50, 'drop', '#c9fbff', 16, 55);
-    addParticles(L.pond.x, L.pond.y - 50, 'spark', '#ffe27a', 8, 40);
-    addFloater(L.pond.x, L.pond.y - 120, '+1 ' + GOODS[id].name, gold ? '#ffe27a' : '#fff5ce');
-    toast(gold ? 'Ôi! Câu được Cá vàng quý hiếm!' : 'Câu được một con Cá chép béo mập!', 'gold', 2800);
-    GameAudio.sfx('fish');
-    save();
-    updateHUD();
-  }
-
-  /* ---------------- cây táo ---------------- */
-  function handleTree() {
-    if (!treeReady()) {
-      toast(`Táo còn chín dở, quay lại sau ${fmtTime(Math.max(0, state.tree.readyAt - now()))} nhé.`, '', 2400);
-      return;
-    }
-    state.inventory.apple = (state.inventory.apple || 0) + 3;
-    state.tree.readyAt = now() + TREE_COOLDOWN;
-    state.tree.shakeUntil = now() + 700;
-    addXp(5);
-    for (let i = 0; i < 9; i++) {
-      addParticles(L.tree.x - 50 + Math.random() * 100, L.tree.y - 250 + Math.random() * 80, 'leaf', i % 2 ? '#ff8b72' : '#79c24a', 1, 30);
-    }
-    addFloater(L.tree.x, L.tree.y - 270, '+3 Táo đỏ', '#fff0b8');
-    toast('Hái được 3 quả táo đỏ mọng!', 'gold', 2400);
-    GameAudio.sfx('shake');
-    save();
-    updateHUD();
-    refreshHover();
-  }
-
-  /* ---------------- học sinh nhỏ: bảng, shop, túi ---------------- */
   function modalHead(title, sub) {
     return `<div class="modal-head">
       <div class="modal-title"><h2>${title}</h2><p>${sub}</p></div>
@@ -1925,8 +1694,6 @@
     modalPanel.className = 'modal-panel ' + (cls || '');
     modalPanel.innerHTML = html;
     hydrateIcons(modalPanel);
-    hydrateAnimalPortraits(modalPanel);
-    hydrateOrchard(modalPanel);
   }
 
   function openModal(type, html, cls) {
@@ -1943,15 +1710,12 @@
       state.flags.welcomeSeen = true;
       save();
     }
-    if (modalType === 'fishing') clearFishTimers();
-    const panelModal = modalType === 'animals' || modalType === 'fishing' || modalType === 'orchard';
     clearInterval(panelRefreshTimer);
     panelRefreshTimer = null;
     modalRoot.classList.add('hidden');
     modalPanel.innerHTML = '';
     modalType = null;
     landPlotIndex = null;
-    if (panelModal) setRailActive('crops');
     if (!visitOpen) setActiveNav('farm');
     if (!silent) GameAudio.sfx('close');
     if (pendingStartConfirm) {
@@ -1969,8 +1733,6 @@
     else if (modalType === 'quests') paintModal(questsHTML(), 'quest-modal');
     else if (modalType === 'mail') paintModal(mailHTML(), 'mail-modal');
     else if (modalType === 'help') paintModal(helpHTML(), 'help-modal');
-    else if (modalType === 'animals') paintModal(animalsHTML(), 'animals-modal');
-    else if (modalType === 'orchard') paintModal(orchardHTML(), 'orchard-modal');
     else if (modalType === 'land') paintModal(landHTML(landPlotIndex), 'land-modal');
     const body = $('.modal-body', modalPanel);
     if (body) body.scrollTop = scroll;
@@ -2014,7 +1776,7 @@
         </div>`;
       }).join('');
     } else {
-      cards = Object.keys(SUPPLIES).filter(id => id !== 'hay').map(id => {
+      cards = Object.keys(SUPPLIES).map(id => {
         const s = SUPPLIES[id];
         const owned = state.inventory[id] || 0;
         const total = s.price * qty;
@@ -2350,7 +2112,7 @@
           <div class="help-step"><span class="hs-ico">🌱</span><div><b>2. Gieo & tưới</b>Chọn hạt giống, click ô đất để gieo. Tưới nước giúp cây lớn nhanh hơn.</div></div>
           <div class="help-step"><span class="hs-ico">🧺</span><div><b>3. Thu hoạch</b>Khi cây chín, click để hái. Mở Túi đồ để bán nông sản lấy vàng.</div></div>
           <div class="help-step"><span class="hs-ico">👩‍🌾</span><div><b>4. Vườn bạn</b>Mở “Vườn bạn” trên thanh menu để ghé thăm, tưới giúp và nhận quà từ bạn bè.</div></div>
-          <div class="help-step"><span class="hs-ico">🎬</span><div><b>5. Quảng trường</b>Mở “Quảng trường” ở cột bên trái để xem YouTube cùng mọi người. Chăn nuôi, Hồ cá và Vườn cây sẽ mở lại ở giai đoạn sau.</div></div>
+          <div class="help-step"><span class="hs-ico">🎬</span><div><b>5. Quảng trường</b>Mở “Quảng trường” ở cột bên trái để xem YouTube cùng mọi người. Các khu vực khác sẽ mở ở giai đoạn sau.</div></div>
         </div>
         <div class="help-tip">
           <b>Mẹo nhỏ:</b> Nước và phân bón giúp cây chín nhanh hơn; bón phân còn tăng thêm 1 nông sản mỗi lần thu hoạch. Đừng quên mở Hòm thư mỗi ngày để nhận quà của Bà Tư.
@@ -2374,7 +2136,7 @@
   function welcomeHTML() {
     return modalHead('Chào mừng về nông trại!', 'Một ngày nắng đẹp đang chờ Bé Nông') +
       `<div class="modal-body">
-        <p class="modal-intro">Đây là nông trại nhỏ của bạn. Giai đoạn này tập trung vào Trồng trọt và Quảng trường; Chăn nuôi, Hồ cá và Vườn cây sẽ được mở lại sau. Hãy bắt đầu bằng những việc đơn giản nhất.</p>
+        <p class="modal-intro">Đây là nông trại nhỏ của bạn. Giai đoạn này tập trung vào Trồng trọt và Quảng trường; các khu vực khác sẽ được mở ở giai đoạn sau. Hãy bắt đầu bằng những việc đơn giản nhất.</p>
         <div class="help-grid">
           <div class="help-step"><span class="hs-ico">⛏️</span><div><b>Chọn Cuốc</b>Click vào ô cỏ để khai hoang. Mỗi hành động tốn 1 năng lượng.</div></div>
           <div class="help-step"><span class="hs-ico">🌱</span><div><b>Gieo & tưới</b>Chọn hạt giống ở thanh dưới, click ô đất. Tưới nước để cây lớn nhanh.</div></div>
@@ -2397,287 +2159,6 @@
       </div>`;
   }
 
-  /* ---------------- bảng chăn nuôi ---------------- */
-  function drawAnimalPortrait(cv, a) {
-    const c = cv.getContext('2d');
-    cv.width = 360;
-    cv.height = 225;
-    c.setTransform(1, 0, 0, 1, 0, 0);
-    c.scale(2, 2);
-    const w = 180, h = 112.5;
-    const sky = c.createLinearGradient(0, 0, 0, 65);
-    sky.addColorStop(0, '#d4f3ff');
-    sky.addColorStop(1, '#f3fbe4');
-    c.fillStyle = sky;
-    c.fillRect(0, 0, w, 65);
-    const grass = c.createLinearGradient(0, 55, 0, h);
-    grass.addColorStop(0, '#a5e372');
-    grass.addColorStop(1, '#6dbb43');
-    c.fillStyle = grass;
-    c.fillRect(0, 55, w, h - 55);
-    // hàng rào
-    for (let i = 0; i < 5; i++) ART.util.drawFencePost(c, 12 + i * 39, 62, 26, 6);
-    ART.util.drawRail(c, 10, 48, 170, 48, 3);
-    ART.util.drawRail(c, 10, 56, 170, 56, 3);
-    // cỏ khô
-    ART.util.drawStone(c, 20, 96, 16, 6, 0, '#e7c269');
-    c.strokeStyle = 'rgba(150,100,25,.5)';
-    c.lineWidth = 1;
-    for (let i = 0; i < 4; i++) {
-      c.beginPath(); c.moveTo(8 + i * 7, 92); c.lineTo(10 + i * 7, 101); c.stroke();
-    }
-    // con vật
-    c.save();
-    if (a.type === 'cow') {
-      c.translate(2, 2);
-      ART.drawAnimal(c, Object.assign({}, a, { x: 88, y: 105, dir: 1, moving: false, phase: 0.4 }), now() / 1000);
-    } else {
-      c.translate(0, 5);
-      c.scale(1.85, 1.85);
-      ART.drawAnimal(c, Object.assign({}, a, { x: 47, y: 55, dir: 1, moving: false, phase: 0.8 }), now() / 1000);
-    }
-    c.restore();
-    // bóng nhẹ viền
-    c.strokeStyle = 'rgba(80,55,20,.12)';
-    c.lineWidth = 2;
-    c.strokeRect(1, 1, w - 2, h - 2);
-  }
-
-  function hydrateAnimalPortraits(root) {
-    root.querySelectorAll('canvas[data-animal]').forEach(cv => {
-      if (cv.dataset.done === '1') return;
-      const a = state.animals.find(x => x.id === cv.dataset.animal);
-      if (!a) return;
-      drawAnimalPortrait(cv, a);
-      cv.dataset.done = '1';
-    });
-  }
-
-  function areaHeaderRes(html) {
-    areaRes.innerHTML = html;
-    hydrateIcons(areaRes);
-  }
-
-  function animalsPageHTML() {
-    const hay = state.inventory.hay || 0;
-    const cards = state.animals.map(a => {
-      const isCow = a.type === 'cow';
-      const ready = animalReady(a);
-      const producing = a.state === 'producing' && !ready;
-      const progress = producing
-        ? clamp((now() - a.fedAt) / Math.max(1, a.readyAt - a.fedAt), 0, 1)
-        : 0;
-      const statusClass = ready ? 'ready' : producing ? 'producing' : '';
-      const statusText = ready ? 'Sẵn sàng thu hoạch' : producing ? 'Đang cho sản phẩm' : 'Đang đói';
-      let action = '';
-      if (ready) {
-        action = `<button class="animal-action gold" data-animal-collect="${a.id}">Thu hoạch ${isCow ? 'sữa' : 'trứng'}</button>`;
-      } else if (producing) {
-        action = `<button class="animal-action" disabled>Còn ${fmtTime(Math.max(0, a.readyAt - now()))}</button>`;
-      } else {
-        action = `<button class="animal-action" data-animal-feed="${a.id}" ${hay <= 0 ? 'disabled' : ''}>Cho ăn (1 cỏ)</button>`;
-      }
-      return `<div class="animal-card">
-        <div class="animal-portrait">
-          <canvas data-animal="${a.id}"></canvas>
-          <span class="animal-status ${statusClass}">${statusText}</span>
-        </div>
-        <div class="animal-body">
-          <div class="animal-name">${a.name}</div>
-          <div class="animal-sub">${isCow ? 'Bò sữa • cho sữa sau 30 giây' : 'Gà mái • cho trứng sau 22 giây'}</div>
-          ${producing ? `<div class="animal-progress"><i style="width:${progress * 100}%"></i></div>` : ''}
-          <div class="animal-actions">${action}${ready ? `<span class="animal-note">+${isCow ? 'sữa' : 'trứng'} vào túi</span>` : ''}</div>
-          ${!producing && !ready ? `<div class="animal-note">Tốn 1 năng lượng và 1 cỏ khô.</div>` : ''}
-        </div>
-      </div>`;
-    }).join('');
-    return `<div class="animals-intro">
-        <p class="modal-intro" style="margin:0">Cho vật nuôi ăn no, chờ một chút rồi quay lại thu hoạch. Sản phẩm sẽ nằm trong Túi đồ.</p>
-      </div>
-      <div class="animals-grid">${cards}</div>
-      <div class="area-actions">
-        <button class="btn btn-ghost" data-open-supplies>Mua cỏ khô</button>
-        <button class="btn btn-ghost" data-open-bag>Mở túi đồ</button>
-      </div>
-      <div class="area-tip">Mẹo: cho bò ăn trước rồi quay sang tưới vườn, lát quay lại là có sữa. Gà cho trứng nhanh hơn bò.</div>`;
-  }
-
-  function fishingPageHTML() {
-    const p = fishPanel.phase;
-    return `<div class="area-fishing-grid">
-      <div>
-        <div class="fish-pond ${p === 'waiting' ? 'waiting' : ''} ${p === 'bite' ? 'bite' : ''}" id="fishPond">
-          <span class="fish-lily l1"></span><span class="fish-lily l2"></span><span class="fish-lily l3"></span>
-          <span class="fish-reed r1"></span><span class="fish-reed r2"></span><span class="fish-reed r3"></span>
-          <span class="fish-shadow f1"></span><span class="fish-shadow f2"></span>
-          <span class="fish-ripple"></span><span class="fish-bobber"></span>
-          <div class="fish-message ${p === 'bite' ? 'gold' : ''}" id="fishMessage">${p === 'waiting' ? 'Chờ cá cắn câu...' : p === 'bite' ? 'CÁ CẮN CÂU! Nhấn ngay!' : p === 'result' ? fishPanel.result : 'Nước hồ phẳng lặng...'}</div>
-        </div>
-        <div class="fish-timer ${p === 'bite' ? 'active' : ''}" id="fishTimer"><i></i></div>
-        <div class="fish-panel-actions">
-          <button class="btn ${p === 'bite' ? 'btn-gold' : ''}" id="fishAction" data-fish-action="${p === 'bite' ? 'reel' : 'cast'}" ${p === 'waiting' ? 'disabled' : ''}>${p === 'waiting' ? 'Đang chờ...' : p === 'bite' ? 'KÉO!' : p === 'result' ? 'Câu tiếp' : 'Thả câu (2 năng lượng)'}</button>
-          <span class="fish-result" id="fishResult">${p === 'result' ? fishPanel.result : 'Cá chép 65 vàng • Cá vàng 130 vàng'}</span>
-        </div>
-        <div class="fish-collection" id="fishInv">${fishCollectionHTML()}</div>
-      </div>
-      <aside class="area-fishing-side">
-        <b>Cẩm nang câu cá</b>
-        <p>Mỗi lần thả câu tốn 2 năng lượng. Khi phao rung và hiện “CÁ CẮN CÂU!”, nhấn KÉO thật nhanh trước khi cá bơi mất.</p>
-        <p>Cá chép bán 65 vàng, cá vàng quý hiếm bán 130 vàng.</p>
-        <button class="btn btn-ghost" data-open-bag>Túi cá</button>
-      </aside>
-    </div>`;
-  }
-
-  function orchardPageHTML() {
-    const ready = treeReady();
-    const left = Math.max(0, state.tree.readyAt - now());
-    const apples = state.inventory.apple || 0;
-    return `<div class="orchard-stage"><canvas id="orchardCanvas"></canvas></div>
-      <div class="orchard-stats">
-        <div class="orchard-stat"><small>Trạng thái</small><b>${ready ? 'Táo đã chín!' : 'Đang chín • ' + fmtTime(left)}</b></div>
-        <div class="orchard-stat"><small>Táo trong túi</small><b>${apples} quả</b></div>
-        <div class="orchard-stat"><small>Giá bán</small><b>25 vàng/quả</b></div>
-      </div>
-      <p class="orchard-note">Mỗi lần hái được 3 quả táo đỏ. Táo có thể bán trong Túi đồ. Cây sẽ chín lại sau 75 giây.</p>
-      <div class="area-actions">
-        <button class="btn ${ready ? 'btn-gold' : ''}" data-orchard-harvest ${ready ? '' : 'disabled'}>${ready ? 'Hái 3 quả táo' : 'Chờ táo chín'}</button>
-        <button class="btn btn-ghost" data-open-bag>Mở túi đồ</button>
-      </div>`;
-  }
-
-  function updateAreaRes() {
-    if (farmArea === 'animals') {
-      areaHeaderRes(`<span class="gift-item">${iconTag('hay')}Cỏ khô × ${state.inventory.hay || 0}</span><span class="gift-item">${iconTag('energy')}${Math.floor(state.player.energy)} năng lượng</span>`);
-    } else if (farmArea === 'fishing') {
-      areaHeaderRes(`<span class="gift-item">${iconTag('energy')}Mỗi lần câu: 2 năng lượng</span><span class="gift-item">${iconTag('fish')}<b id="areaFishCount">${(state.inventory.fish || 0) + (state.inventory.goldfish || 0)}</b>&nbsp;cá</span>`);
-    } else if (farmArea === 'orchard') {
-      areaHeaderRes(`<span class="gift-item">${iconTag('apple')}${state.inventory.apple || 0} táo</span><span class="gift-item">${iconTag('coin')}${fmt(state.player.coins)} vàng</span>`);
-    }
-  }
-
-  function animalDockHTML() {
-    const a = state.animals.find(x => x.id === selectedAnimalId) || state.animals[0];
-    const hay = state.inventory.hay || 0;
-    const pickers = state.animals.map(x => {
-      const ready = animalReady(x);
-      const producing = x.state === 'producing' && !ready;
-      const dot = ready ? 'ready' : producing ? 'producing' : '';
-      return `<button class="animal-pick ${x.id === a.id ? 'active' : ''}" data-select-animal="${x.id}">
-        <span class="ap-emoji">${x.type === 'cow' ? '🐄' : '🐔'}</span>
-        <span class="ap-name">${x.name}</span>
-        <i class="ap-dot ${dot}"></i>
-      </button>`;
-    }).join('');
-    const ready = animalReady(a);
-    const producing = a.state === 'producing' && !ready;
-    const progress = producing ? clamp((now() - a.fedAt) / Math.max(1, a.readyAt - a.fedAt), 0, 1) : 0;
-    const status = ready ? 'Sẵn sàng thu hoạch' : producing ? `Đang cho sản phẩm • ${fmtTime(Math.max(0, a.readyAt - now()))}` : 'Đang đói bụng';
-    let action = '';
-    if (ready) {
-      action = `<button class="animal-action gold" data-animal-collect="${a.id}">Thu hoạch ${a.type === 'cow' ? 'sữa' : 'trứng'}</button>`;
-    } else if (producing) {
-      action = `<button class="animal-action" disabled>Đang chờ...</button>`;
-    } else {
-      action = `<button class="animal-action" data-animal-feed="${a.id}" ${hay <= 0 ? 'disabled' : ''}>Cho ăn (1 cỏ)</button>`;
-    }
-    return `<div class="animal-picker">${pickers}</div>
-      <div class="animal-selected">
-        <div class="sel-copy">
-          <b>${a.name}</b>
-          <span>${status}</span>
-          <div class="sel-bar"><i style="width:${progress * 100}%"></i></div>
-        </div>
-        <div class="animal-actions">${action}</div>
-      </div>
-      <span class="hay-chip">${iconTag('hay')}× ${hay}</span>`;
-  }
-
-  function fishingDockHTML() {
-    return `<div class="fish-state">
-        <span class="fish-emoji">🎣</span>
-        <div>
-          <b id="fishDockTitle">Hồ cá phẳng lặng</b>
-          <small id="fishDockText">Thả câu và chờ phao rung.</small>
-          <div class="fish-mini-bar"><i id="fishDockBar" style="width:0%"></i></div>
-        </div>
-      </div>
-      <div class="dock-actions">
-        <button class="btn" id="fishAction" data-fish-action="cast">Thả câu (2 năng lượng)</button>
-        <button class="btn btn-ghost" data-open-bag>Túi cá</button>
-      </div>`;
-  }
-
-  function orchardDockHTML() {
-    const ready = treeReady();
-    const apples = state.inventory.apple || 0;
-    return `<div class="orchard-state">
-        <span class="ap-emoji">🍎</span>
-        <div>
-          <b>${ready ? 'Táo đã chín!' : 'Táo đang chín • ' + fmtTime(Math.max(0, state.tree.readyAt - now()))}</b>
-          <small>Trong túi: ${apples} quả • 25 vàng/quả</small>
-        </div>
-      </div>
-      <div class="dock-actions">
-        <button class="btn ${ready ? 'btn-gold' : ''}" data-orchard-harvest ${ready ? '' : 'disabled'}>${ready ? 'Hái 3 quả táo' : 'Chờ táo chín'}</button>
-        <button class="btn btn-ghost" data-open-bag>Mở túi đồ</button>
-      </div>`;
-  }
-
-  function renderAreaDock() {
-    if (farmArea === 'garden') return;
-    updateAreaRes();
-    areaDock.className = 'area-dock ' + (farmArea === 'animals' ? 'animal-dock' : farmArea === 'fishing' ? 'fish-dock' : 'orchard-dock');
-    let html = '';
-    if (farmArea === 'animals') html = animalDockHTML();
-    else if (farmArea === 'fishing') html = fishingDockHTML();
-    else html = orchardDockHTML();
-    areaDock.innerHTML = html;
-    hydrateIcons(areaDock);
-    if (farmArea === 'fishing') updateFishingPanel();
-  }
-
-  function drawAreaFrame(t) {
-    if (farmArea === 'garden' || visitOpen) return;
-    areaCtx.setTransform(RENDER_SCALE, 0, 0, RENDER_SCALE, 0, 0);
-    areaCtx.clearRect(0, 0, 1280, 720);
-    AREAS.draw(areaCtx, farmArea, t, {
-      animals: state.animals,
-      selectedAnimalId,
-      treeReady: treeReady(),
-      treeShake: now() < (state.tree.shakeUntil || 0),
-      fishPhase: fishPanel.phase
-    });
-  }
-
-  function renderAreaPage() {
-    if (farmArea === 'garden') return;
-    areaPage.className = 'area-page ' + farmArea;
-    areaPage.classList.remove('hidden');
-    const meta = {
-      animals: { kicker: 'KHU CHĂN NUÔI', title: 'Chuồng thú', sub: 'Cho ăn, chờ sản phẩm và thu hoạch sữa, trứng.' },
-      fishing: { kicker: 'KHU AO CÁ', title: 'Hồ cá', sub: 'Thả câu, chờ cá cắn rồi kéo lên thật nhanh.' },
-      orchard: { kicker: 'KHU VƯỜN CÂY', title: 'Vườn cây ăn quả', sub: 'Cây táo sai quả, hái 3 quả mỗi 75 giây.' }
-    }[farmArea];
-    areaKicker.textContent = meta.kicker;
-    areaTitle.textContent = meta.title;
-    areaSubtitle.textContent = meta.sub;
-    renderAreaDock();
-    drawAreaFrame(now() / 1000);
-  }
-
-  function startAreaRefresh() {
-    clearInterval(areaRefreshTimer);
-    areaRefreshTimer = setInterval(() => {
-      if ((farmArea === 'animals' || farmArea === 'orchard') && areaPage && !areaPage.classList.contains('hidden')) {
-        renderAreaDock();
-      } else {
-        clearInterval(areaRefreshTimer);
-        areaRefreshTimer = null;
-      }
-    }, 1000);
-  }
-
   function syncPlazaPlayback() {
     if (farmArea === 'plaza' && !visitOpen && modalRoot.classList.contains('hidden') && !$('#accountOverlay:not(.hidden)')) {
       Plaza.enter();
@@ -2687,367 +2168,23 @@
   }
 
   function setFarmArea(area) {
-    if (!['garden', 'animals', 'fishing', 'orchard', 'plaza'].includes(area)) area = 'garden';
-    if (area === 'plaza' && area === farmArea) { syncPlazaPlayback(); return; }
-    if (area === farmArea && (area === 'garden' || !areaPage.classList.contains('hidden'))) {
-      if (area !== 'garden') renderAreaPage();
+    if (area !== 'plaza') area = 'garden';
+    if (area === farmArea) {
+      if (area === 'plaza') syncPlazaPlayback();
       return;
     }
-    clearInterval(areaRefreshTimer);
-    areaRefreshTimer = null;
-    if (farmArea === 'fishing' && area !== 'fishing') clearFishTimers();
     if (farmArea === 'plaza') Plaza.leave();
-    if (area === 'fishing' && farmArea !== 'fishing') {
-      clearFishTimers();
-      fishPanel.phase = 'idle';
-      fishPanel.result = '';
-    }
     farmArea = area;
     plazaPage.classList.toggle('hidden', area !== 'plaza');
     stage.classList.toggle('plaza-mode', area === 'plaza');
+    stage.classList.toggle('area-mode', area === 'plaza');
     applyAudioSettings();
-    setRailActive(area === 'garden' ? 'crops' : area);
+    setRailActive(area === 'garden' ? 'crops' : '');
     setActiveNav('farm');
     hideTooltip();
-    if (area === 'garden') {
-      areaPage.classList.add('hidden');
-      stage.classList.remove('area-mode');
-      updateHUD();
-      save();
-      return;
-    }
-    stage.classList.add('area-mode');
-    if (area === 'plaza') {
-      areaPage.classList.add('hidden');
-      syncPlazaPlayback();
-      updateHUD();
-      save();
-      return;
-    }
-    areaPage.classList.remove('hidden');
-    renderAreaPage();
-    updateHUD();
-    if (area === 'animals' || area === 'orchard') startAreaRefresh();
-    save();
-  }
-
-  function animalsHTML() {
-    const hay = state.inventory.hay || 0;
-    const cards = state.animals.map(a => {
-      const isCow = a.type === 'cow';
-      const ready = animalReady(a);
-      const producing = a.state === 'producing' && !ready;
-      const progress = producing
-        ? clamp((now() - a.fedAt) / Math.max(1, a.readyAt - a.fedAt), 0, 1)
-        : 0;
-      const statusClass = ready ? 'ready' : producing ? 'producing' : '';
-      const statusText = ready ? 'Sẵn sàng thu hoạch' : producing ? 'Đang cho sản phẩm' : 'Đang đói';
-      let action = '';
-      if (ready) {
-        action = `<button class="animal-action gold" data-animal-collect="${a.id}">Thu hoạch ${isCow ? 'sữa' : 'trứng'}</button>`;
-      } else if (producing) {
-        action = `<button class="animal-action" disabled>Còn ${fmtTime(Math.max(0, a.readyAt - now()))}</button>`;
-      } else {
-        action = `<button class="animal-action" data-animal-feed="${a.id}" ${hay <= 0 ? 'disabled' : ''}>Cho ăn (1 cỏ)</button>`;
-      }
-      return `<div class="animal-card">
-        <div class="animal-portrait">
-          <canvas data-animal="${a.id}"></canvas>
-          <span class="animal-status ${statusClass}">${statusText}</span>
-        </div>
-        <div class="animal-body">
-          <div class="animal-name">${a.name}</div>
-          <div class="animal-sub">${isCow ? 'Bò sữa • cho sữa sau 30 giây' : 'Gà mái • cho trứng sau 22 giây'}</div>
-          ${producing ? `<div class="animal-progress"><i style="width:${progress * 100}%"></i></div>` : ''}
-          <div class="animal-actions">${action}${ready ? `<span class="animal-note">+${isCow ? 'sữa' : 'trứng'} vào túi</span>` : ''}</div>
-          ${!producing && !ready ? `<div class="animal-note">Tốn 1 năng lượng và 1 cỏ khô.</div>` : ''}
-        </div>
-      </div>`;
-    }).join('');
-
-    return modalHead('Chuồng thú', 'Chăm sóc bò và gà để nhận sữa, trứng mỗi ngày') +
-      `<div class="modal-body">
-        <div class="animals-intro">
-          <p class="modal-intro" style="margin:0">Cho vật nuôi ăn no, chờ một chút rồi quay lại thu hoạch. Sản phẩm sẽ nằm trong Túi đồ.</p>
-          <div class="animals-resources">
-            <span class="gift-item">${iconTag('hay')}Cỏ khô × ${hay}</span>
-            <span class="gift-item">${iconTag('energy')}Năng lượng ${Math.floor(state.player.energy)}</span>
-          </div>
-        </div>
-        <div class="animals-grid">${cards}</div>
-      </div>
-      <div class="modal-foot">
-        <button class="btn btn-ghost" data-open-supplies>Mua cỏ khô</button>
-        <button class="btn" data-close>Đóng</button>
-      </div>`;
-  }
-
-  function startPanelRefresh() {
-    clearInterval(panelRefreshTimer);
-    panelRefreshTimer = setInterval(() => {
-      if (modalType === 'animals' || modalType === 'orchard') refreshModal();
-      else { clearInterval(panelRefreshTimer); panelRefreshTimer = null; }
-    }, 1200);
-  }
-
-  function openAnimals() {
-    setFarmArea('animals');
-  }
-
-  /* ---------------- bảng vườn cây ---------------- */
-  function drawOrchardScene(cv) {
-    const c = cv.getContext('2d');
-    cv.width = 1600;
-    cv.height = 640;
-    c.setTransform(1, 0, 0, 1, 0, 0);
-    c.scale(2, 2);
-    const w = 800, h = 320;
-    const sky = c.createLinearGradient(0, 0, 0, 180);
-    sky.addColorStop(0, '#c9f0ff');
-    sky.addColorStop(1, '#f0f9d8');
-    c.fillStyle = sky;
-    c.fillRect(0, 0, w, h);
-    // mặt trời, mây
-    c.fillStyle = 'rgba(255,240,160,.45)';
-    c.beginPath(); c.arc(690, 50, 55, 0, Math.PI * 2); c.fill();
-    ART.util.drawCloud(c, 170, 55, 0.65, 0.75);
-    ART.util.drawCloud(c, 560, 36, 0.45, 0.55);
-    // đồi cỏ
-    const g = c.createLinearGradient(0, 170, 0, h);
-    g.addColorStop(0, '#a5de76');
-    g.addColorStop(1, '#68b747');
-    c.fillStyle = g;
-    c.beginPath();
-    c.moveTo(0, 190);
-    c.bezierCurveTo(150, 160, 280, 200, 420, 178);
-    c.bezierCurveTo(560, 158, 670, 196, 800, 172);
-    c.lineTo(800, h); c.lineTo(0, h); c.closePath();
-    c.fill();
-    // cây
-    const tx = 400, ty = 300;
-    ART.util.ellipse(c, tx, ty + 6, 100, 24, 'rgba(50,85,25,.22)');
-    c.fillStyle = '#8a5a2d';
-    ART.util.fillRR(c, tx - 12, ty - 150, 24, 155, 8, '#8a5a2d');
-    c.strokeStyle = '#6b421f'; c.lineWidth = 3;
-    ART.util.rr(c, tx - 12, ty - 150, 24, 155, 8);
-    c.stroke();
-    c.strokeStyle = '#8a5a2d'; c.lineWidth = 12;
-    c.beginPath();
-    c.moveTo(tx - 4, ty - 135); c.quadraticCurveTo(tx - 75, ty - 190, tx - 100, ty - 210);
-    c.moveTo(tx + 4, ty - 150); c.quadraticCurveTo(tx + 75, ty - 200, tx + 102, ty - 215);
-    c.stroke();
-    const blobs = [
-      [-82, -215, 58, 48, '#4f9b36'], [8, -235, 68, 54, '#5dab3e'],
-      [82, -208, 50, 42, '#4a9131'], [-8, -190, 72, 48, '#67b348'],
-      [-112, -190, 36, 30, '#43862d'], [58, -260, 42, 34, '#70bc4c']
-    ];
-    blobs.forEach(([bx, by, rx, ry, col]) => {
-      ART.util.ellipse(c, tx + bx, ty + by, rx, ry, col);
-      c.globalAlpha = 0.25;
-      ART.util.ellipse(c, tx + bx - rx * 0.2, ty + by - ry * 0.3, rx * 0.55, ry * 0.42, '#c7f095');
-      c.globalAlpha = 1;
-    });
-    const ready = treeReady();
-    const rnd = ART.util.makeRand(88);
-    for (let i = 0; i < 10; i++) {
-      const ax = tx - 105 + rnd() * 210;
-      const ay = ty - 265 + rnd() * 120;
-      if (ready) {
-        c.beginPath(); c.arc(ax, ay, 7, 0, Math.PI * 2);
-        c.fillStyle = i % 2 ? '#e8483a' : '#d73834'; c.fill();
-        c.strokeStyle = '#a52220'; c.lineWidth = 1; c.stroke();
-        c.fillStyle = 'rgba(255,255,255,.6)';
-        c.beginPath(); c.arc(ax - 2, ay - 2, 1.8, 0, Math.PI * 2); c.fill();
-      } else {
-        c.beginPath(); c.arc(ax, ay, 4, 0, Math.PI * 2);
-        c.fillStyle = '#87b74b'; c.fill();
-      }
-    }
-    // cỏ và hoa
-    for (let i = 0; i < 30; i++) {
-      ART.util.drawGrassTuft(c, 30 + rnd() * 740, 255 + rnd() * 60, 1.5 + rnd() * 2, rnd() > 0.5 ? '#4a9632' : '#6dbb43');
-    }
-    ART.util.drawFlower(c, 200, 290, 1.8, '#fff4df');
-    ART.util.drawFlower(c, 610, 300, 1.7, '#ffe27a');
-    // giỏ táo
-    c.fillStyle = '#b98348';
-    c.beginPath(); c.ellipse(590, 300, 36, 12, 0, 0, Math.PI * 2); c.fill();
-    c.strokeStyle = '#8a5a2c'; c.lineWidth = 3;
-    c.beginPath(); c.ellipse(590, 300, 36, 12, 0, 0, Math.PI * 2); c.stroke();
-    if (ready) {
-      for (let i = 0; i < 4; i++) {
-        c.beginPath(); c.arc(574 + i * 11, 292 - (i % 2) * 6, 7, 0, Math.PI * 2);
-        c.fillStyle = '#e8483a'; c.fill();
-        c.fillStyle = 'rgba(255,255,255,.55)';
-        c.beginPath(); c.arc(572 + i * 11, 290 - (i % 2) * 6, 1.7, 0, Math.PI * 2); c.fill();
-      }
-    }
-  }
-
-  function hydrateOrchard(root) {
-    const cv = root.querySelector('#orchardCanvas');
-    if (cv && cv.dataset.done !== '1') {
-      drawOrchardScene(cv);
-      cv.dataset.done = '1';
-    }
-  }
-
-  function orchardHTML() {
-    const ready = treeReady();
-    const left = Math.max(0, state.tree.readyAt - now());
-    const apples = state.inventory.apple || 0;
-    return modalHead('Vườn cây ăn quả', 'Cây táo nhà bạn đang sai quả') +
-      `<div class="modal-body">
-        <div class="orchard-stage"><canvas id="orchardCanvas"></canvas></div>
-        <div class="orchard-stats">
-          <div class="orchard-stat"><small>Trạng thái</small><b>${ready ? 'Táo đã chín!' : 'Đang chín • ' + fmtTime(left)}</b></div>
-          <div class="orchard-stat"><small>Táo trong túi</small><b>${apples} quả</b></div>
-          <div class="orchard-stat"><small>Giá bán</small><b>25 vàng/quả</b></div>
-        </div>
-        <p class="orchard-note">Mỗi lần hái được 3 quả táo đỏ. Táo có thể bán trong Túi đồ. Cây sẽ chín lại sau 75 giây.</p>
-      </div>
-      <div class="modal-foot">
-        <button class="btn ${ready ? 'btn-gold' : ''}" data-orchard-harvest ${ready ? '' : 'disabled'}>${ready ? 'Hái 3 quả táo' : 'Chờ táo chín'}</button>
-        <button class="btn btn-ghost" data-open-bag>Mở túi đồ</button>
-        <button class="btn" data-close>Đóng</button>
-      </div>`;
-  }
-
-  function openOrchard() {
-    setFarmArea('orchard');
-  }
-
-  function harvestTree() {
-    if (!treeReady()) {
-      toast(`Táo còn chín dở, quay lại sau ${fmtTime(Math.max(0, state.tree.readyAt - now()))} nhé.`, '', 2400);
-      return false;
-    }
-    state.inventory.apple = (state.inventory.apple || 0) + 3;
-    state.tree.readyAt = now() + TREE_COOLDOWN;
-    state.tree.shakeUntil = now() + 700;
-    addXp(5);
-    addFloater(L.tree.x, L.tree.y - 270, '+3 Táo đỏ', '#fff0b8');
-    toast('Hái được 3 quả táo đỏ mọng!', 'gold', 2400);
-    GameAudio.sfx('shake');
+    if (area === 'plaza') syncPlazaPlayback();
     updateHUD();
     save();
-    return true;
-  }
-
-  /* ---------------- hồ cá ---------------- */
-  let fishPanel = { phase: 'idle', mainTimer: null, biteTimer: null, result: '' };
-
-  function fishCollectionHTML() {
-    const ids = ['fish', 'goldfish'];
-    const items = ids.filter(id => (state.inventory[id] || 0) > 0);
-    if (!items.length) return '<span class="fish-chip">Túi cá đang trống</span>';
-    return items.map(id => `<span class="fish-chip">${iconTag(GOODS[id].icon)}${GOODS[id].name} × ${state.inventory[id]}</span>`).join('');
-  }
-
-  function fishingHTML() {
-    const p = fishPanel.phase;
-    return modalHead('Hồ cá', 'Thả câu, chờ cá cắn rồi kéo lên thật nhanh') +
-      `<div class="modal-body">
-        <p class="modal-intro">Mỗi lần thả câu tốn 2 năng lượng. Khi phao rung và hiện chữ “CÁ CẮN CÂU!”, hãy nhấn KÉO thật nhanh trước khi cá bơi mất.</p>
-        <div class="fish-pond ${p === 'waiting' ? 'waiting' : ''} ${p === 'bite' ? 'bite' : ''}" id="fishPond">
-          <span class="fish-lily l1"></span><span class="fish-lily l2"></span><span class="fish-lily l3"></span>
-          <span class="fish-reed r1"></span><span class="fish-reed r2"></span><span class="fish-reed r3"></span>
-          <span class="fish-shadow f1"></span><span class="fish-shadow f2"></span>
-          <span class="fish-ripple"></span><span class="fish-bobber"></span>
-          <div class="fish-message ${p === 'bite' ? 'gold' : ''}" id="fishMessage">${p === 'waiting' ? 'Chờ cá cắn câu...' : p === 'bite' ? 'CÁ CẮN CÂU! Nhấn ngay!' : p === 'result' ? fishPanel.result : 'Nước hồ phẳng lặng...'}</div>
-        </div>
-        <div class="fish-timer ${p === 'bite' ? 'active' : ''}" id="fishTimer"><i></i></div>
-        <div class="fish-panel-actions">
-          <button class="btn ${p === 'bite' ? 'btn-gold' : ''}" id="fishAction" data-fish-action="${p === 'bite' ? 'reel' : 'cast'}" ${p === 'waiting' ? 'disabled' : ''}>${p === 'waiting' ? 'Đang chờ...' : p === 'bite' ? 'KÉO!' : p === 'result' ? 'Câu tiếp' : 'Thả câu (2 năng lượng)'}</button>
-          <span class="fish-result" id="fishResult">${p === 'result' ? fishPanel.result : 'Cá chép 65 vàng • Cá vàng 130 vàng'}</span>
-        </div>
-        <div class="fish-collection" id="fishInv">${fishCollectionHTML()}</div>
-      </div>
-      <div class="modal-foot"><button class="btn btn-ghost" data-open-bag>Túi cá</button><button class="btn" data-close>Đóng</button></div>`;
-  }
-
-  function updateFishingPanel() {
-    const action = $('#fishAction');
-    if (!action) return;
-    const p = fishPanel.phase;
-    const title = $('#fishDockTitle');
-    const text = $('#fishDockText');
-    if (title) title.textContent = p === 'waiting' ? 'Đang chờ cá...' : p === 'bite' ? 'CÁ CẮN CÂU!' : p === 'result' ? 'Vừa câu được cá!' : 'Hồ cá phẳng lặng';
-    if (text) text.textContent = p === 'waiting' ? 'Phao đang lập lờ trên mặt nước...' : p === 'bite' ? 'Nhấn KÉO thật nhanh trước khi cá bơi mất!' : p === 'result' ? fishPanel.result : 'Thả câu và chờ phao rung.';
-    action.disabled = p === 'waiting';
-    action.className = 'btn' + (p === 'bite' ? ' btn-gold' : '');
-    action.dataset.fishAction = p === 'bite' ? 'reel' : 'cast';
-    action.textContent = p === 'waiting' ? 'Đang chờ...' : p === 'bite' ? 'KÉO!' : p === 'result' ? 'Câu tiếp' : 'Thả câu (2 năng lượng)';
-    areaDock.classList.toggle('bite', p === 'bite');
-    if (p === 'bite') {
-      areaDock.classList.remove('bite');
-      void areaDock.offsetWidth;
-      areaDock.classList.add('bite');
-    }
-    const ac = $('#areaFishCount');
-    if (ac) ac.textContent = (state.inventory.fish || 0) + (state.inventory.goldfish || 0);
-  }
-
-  function openFishing() {
-    fishPanel.phase = 'idle';
-    fishPanel.result = '';
-    clearFishTimers();
-    setFarmArea('fishing');
-    updateFishingPanel();
-  }
-
-  function startFishingGame() {
-    if (!spendEnergy(2)) return;
-    fishPanel.phase = 'waiting';
-    fishPanel.result = '';
-    updateFishingPanel();
-    clearTimeout(fishPanel.mainTimer);
-    clearTimeout(fishPanel.biteTimer);
-    fishPanel.mainTimer = setTimeout(() => {
-      fishPanel.phase = 'bite';
-      GameAudio.sfx('splash');
-      updateFishingPanel();
-      fishPanel.biteTimer = setTimeout(() => {
-        if (fishPanel.phase !== 'bite') return;
-        fishPanel.phase = 'result';
-        fishPanel.result = 'Cá đã bơi mất rồi! Thử lại nhé.';
-        GameAudio.sfx('error');
-        updateFishingPanel();
-      }, 1800);
-    }, 2200 + Math.random() * 2200);
-  }
-
-  function reelFishingGame() {
-    if (fishPanel.phase === 'waiting') {
-      toast('Suỵt... cá đang tới gần, chờ phao rung đã nhé!', '', 1800);
-      return;
-    }
-    if (fishPanel.phase !== 'bite') {
-      startFishingGame();
-      return;
-    }
-    clearTimeout(fishPanel.mainTimer);
-    clearTimeout(fishPanel.biteTimer);
-    const gold = Math.random() < 0.14;
-    const id = gold ? 'goldfish' : 'fish';
-    state.inventory[id] = (state.inventory[id] || 0) + 1;
-    addXp(6);
-    track('fish', 1);
-    fishPanel.phase = 'result';
-    fishPanel.result = gold ? 'Ôi! Câu được Cá vàng quý hiếm!' : 'Câu được một con Cá chép béo mập!';
-    GameAudio.sfx('fish');
-    toast(`${fishPanel.result} +6 XP`, gold ? 'gold' : '', 2800);
-    updateHUD();
-    save();
-    updateFishingPanel();
-  }
-
-  function clearFishTimers() {
-    clearTimeout(fishPanel.mainTimer);
-    clearTimeout(fishPanel.biteTimer);
-    fishPanel.mainTimer = null;
-    fishPanel.biteTimer = null;
-    fishPanel.phase = 'idle';
   }
 
   function setRailActive(area) {
@@ -3110,7 +2247,6 @@
     stage.classList.remove('start-mode');
     stage.classList.remove('area-mode');
     farmArea = 'garden';
-    areaPage.classList.add('hidden');
     setActiveNav('farm');
     setRailActive('crops');
     ensureDaily();
@@ -3135,9 +2271,6 @@
     selectedSeed = 'carrot';
     shopTab = 'seeds';
     shopQty = 1;
-    fishing.phase = null;
-    fishPanel.phase = 'idle';
-    clearFishTimers();
     clearInterval(panelRefreshTimer);
     particles = [];
     floaters = [];
@@ -3145,9 +2278,6 @@
     visitOpen = false;
     visitScreen.classList.add('hidden');
     farmArea = 'garden';
-    clearInterval(areaRefreshTimer);
-    areaRefreshTimer = null;
-    areaPage.classList.add('hidden');
     stage.classList.remove('area-mode');
     pendingStartConfirm = false;
     modalRoot.classList.add('hidden');
@@ -3200,10 +2330,7 @@
           setFarmArea('garden');
           return;
         }
-        if (area === 'animals') openAnimals();
-        else if (area === 'fishing') openFishing();
-        else if (area === 'orchard') openOrchard();
-        else if (area === 'plaza') setFarmArea('plaza');
+        if (area === 'plaza') setFarmArea('plaza');
       });
     });
 
@@ -3213,68 +2340,6 @@
     document.addEventListener('account-visibility', () => { if (farmArea === 'plaza') syncPlazaPlayback(); });
     window.addEventListener('pagehide', () => { if (farmArea === 'plaza') Plaza.leave(); });
     window.addEventListener('pageshow', event => { if (event.persisted && farmArea === 'plaza') syncPlazaPlayback(); });
-
-    areaPage.addEventListener('click', e => {
-      if (e.target.closest('[data-area-back]')) { setFarmArea('garden'); return; }
-      let t;
-      if ((t = e.target.closest('[data-select-animal]'))) {
-        selectedAnimalId = t.dataset.selectAnimal;
-        renderAreaDock();
-        return;
-      }
-      if ((t = e.target.closest('[data-animal-feed]'))) {
-        const a = state.animals.find(x => x.id === t.dataset.animalFeed);
-        if (a) { selectedAnimalId = a.id; interactAnimal(a); renderAreaDock(); }
-        return;
-      }
-      if ((t = e.target.closest('[data-animal-collect]'))) {
-        const a = state.animals.find(x => x.id === t.dataset.animalCollect);
-        if (a) { selectedAnimalId = a.id; interactAnimal(a); renderAreaDock(); }
-        return;
-      }
-      if (e.target.closest('[data-orchard-harvest]')) {
-        if (harvestTree()) renderAreaDock();
-        return;
-      }
-      if (e.target.closest('[data-fish-action]')) {
-        const action = e.target.closest('[data-fish-action]').dataset.fishAction;
-        if (action === 'reel') reelFishingGame();
-        else startFishingGame();
-        return;
-      }
-      if (e.target.closest('[data-open-bag]')) { openBag(); return; }
-      if (e.target.closest('[data-open-supplies]')) { openShop('supplies'); return; }
-    });
-
-    function areaPoint(e) {
-      const r = areaCanvas.getBoundingClientRect();
-      return {
-        x: (e.clientX - r.left) / r.width * 1280,
-        y: (e.clientY - r.top) / r.height * 720
-      };
-    }
-    areaCanvas.addEventListener('pointermove', e => {
-      if (farmArea === 'garden' || areaPage.classList.contains('hidden')) return;
-      const p = areaPoint(e);
-      const hit = AREAS.hit(farmArea, p.x, p.y, {});
-      areaCanvas.style.cursor = hit ? 'pointer' : 'default';
-    });
-    areaCanvas.addEventListener('click', e => {
-      if (farmArea === 'garden' || areaPage.classList.contains('hidden')) return;
-      const p = areaPoint(e);
-      const hit = AREAS.hit(farmArea, p.x, p.y, {});
-      if (!hit) return;
-      if (hit.kind === 'animal') {
-        selectedAnimalId = hit.id;
-        renderAreaDock();
-      } else if (hit.kind === 'water') {
-        if (fishPanel.phase === 'bite') reelFishingGame();
-        else if (fishPanel.phase !== 'waiting') startFishingGame();
-      } else if (hit.kind === 'tree') {
-        if (treeReady()) { if (harvestTree()) renderAreaDock(); }
-        else toast(`Táo còn ${fmtTime(Math.max(0, state.tree.readyAt - now()))} nữa mới chín.`, 'gold', 2200);
-      }
-    });
 
     el.friendTabs.addEventListener('click', e => {
       const b = e.target.closest('[data-friend]');
@@ -3339,28 +2404,8 @@
       if (e.target.closest('[data-claim-chain]')) { claimChain(); return; }
       if ((t = e.target.closest('[data-claim-daily]'))) { claimDaily(Number(t.dataset.claimDaily)); return; }
       if (e.target.closest('[data-mail-claim]')) { claimMail(); return; }
-      if ((t = e.target.closest('[data-animal-feed]'))) {
-        const a = state.animals.find(x => x.id === t.dataset.animalFeed);
-        if (a) interactAnimal(a);
-        return;
-      }
-      if ((t = e.target.closest('[data-animal-collect]'))) {
-        const a = state.animals.find(x => x.id === t.dataset.animalCollect);
-        if (a) interactAnimal(a);
-        return;
-      }
-      if (e.target.closest('[data-orchard-harvest]')) {
-        if (harvestTree()) refreshModal();
-        return;
-      }
       if (e.target.closest('[data-open-bag]')) { openBag(); return; }
       if (e.target.closest('[data-open-supplies]')) { openShop('supplies'); return; }
-      if (e.target.closest('[data-fish-action]')) {
-        const action = e.target.closest('[data-fish-action]').dataset.fishAction;
-        if (action === 'reel') reelFishingGame();
-        else startFishingGame();
-        return;
-      }
       if (e.target.closest('[data-go-shop]')) { openShop('seeds'); return; }
       if (e.target.closest('[data-toggle-sound]')) { toggleSound(); return; }
       if (e.target.closest('[data-toggle-music]')) { toggleMusic(); return; }
@@ -3519,7 +2564,6 @@
     ensureFriendsDaily();
     buildSeedBar();
     bindEvents();
-    areaPage.classList.add('hidden');
     stage.classList.remove('area-mode');
     syncEnergy();
     updateHUD();
@@ -3548,7 +2592,6 @@
   // API nhỏ dùng cho kiểm thử / gỡ lỗi
   window.NT = {
     get state() { return state; },
-    get fishing() { return fishing; },
     get tool() { return currentTool; },
     save,
     openShop,
