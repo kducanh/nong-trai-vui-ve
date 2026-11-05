@@ -85,6 +85,7 @@
   function open(tab = '') {
     ensureOverlay();
     overlay.classList.remove('hidden');
+    document.dispatchEvent(new Event('account-visibility'));
     view = 'profile';
     if (!me) authTab = tab === 'register' ? 'register' : 'login';
     render();
@@ -92,6 +93,7 @@
   function close() {
     if (!overlay) return;
     overlay.classList.add('hidden');
+    document.dispatchEvent(new Event('account-visibility'));
     stopChatPoll();
   }
 

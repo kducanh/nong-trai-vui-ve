@@ -29,13 +29,50 @@
     ctx.fillStyle = 'rgba(57,88,32,.35)';
     ctx.fill();
 
+    if (plot.unlocked === false) {
+      // Unclaimed land has dry sage grass and survey stakes, not crop furrows.
+      U.diamondPath(ctx, cx, cy, tw, th);
+      const dormant = ctx.createLinearGradient(cx, cy - th / 2, cx, cy + th / 2);
+      dormant.addColorStop(0, '#c3c3a0');
+      dormant.addColorStop(.5, '#afb18d');
+      dormant.addColorStop(1, '#959d79');
+      ctx.fillStyle = dormant; ctx.fill();
+      ctx.strokeStyle = '#8c936f'; ctx.lineWidth = 1.3; ctx.stroke();
+      ctx.save();
+      U.diamondPath(ctx, cx, cy, tw - 8, th - 6); ctx.clip();
+      for (let k = 0; k < 4; k++) {
+        const a = i * 1.3 + k * 2.1;
+        ctx.globalAlpha = .55;
+        U.drawGrassTuft(ctx, cx + Math.cos(a) * tw * .23, cy + Math.sin(a) * th * .19,
+          1.6, k % 2 ? '#d9d2a9' : '#808966');
+      }
+      ctx.restore();
+      U.diamondPath(ctx, cx, cy, tw - 15, th - 10);
+      ctx.strokeStyle = 'rgba(248,240,206,.8)'; ctx.lineWidth = 1.4;
+      ctx.setLineDash([5, 4]); ctx.stroke(); ctx.setLineDash([]);
+      const stakes = [[cx, cy - th / 2 + 4], [cx - tw / 2 + 7, cy],
+        [cx + tw / 2 - 7, cy], [cx, cy + th / 2 - 4]];
+      stakes.forEach(([x, y]) => {
+        U.ellipse(ctx, x + 2, y + 1, 4.5, 1.5, 'rgba(75,66,43,.18)');
+        U.fillRR(ctx, x - 2, y - 10, 4, 11, 1, '#9e8055');
+        ctx.fillStyle = '#d5bb86'; ctx.fillRect(x - 2, y - 9, 1.4, 8);
+        U.ellipse(ctx, x, y - 10, 2, 1, '#e7cfa0');
+      });
+      if (hovered) {
+        U.diamondPath(ctx, cx, cy, tw + 2, th + 2);
+        ctx.strokeStyle = '#fff0b6'; ctx.lineWidth = 2.5; ctx.stroke();
+      }
+      ctx.restore();
+      return;
+    }
+
     if (!plot.tilled) {
       // ô cỏ non
       U.diamondPath(ctx, cx, cy, tw, th);
       const g = ctx.createLinearGradient(cx, cy - th / 2, cx, cy + th / 2);
-      g.addColorStop(0, '#a4e16b');
-      g.addColorStop(0.55, '#8bd555');
-      g.addColorStop(1, '#74c145');
+      g.addColorStop(0, '#b4cf88');
+      g.addColorStop(0.55, '#9bbd74');
+      g.addColorStop(1, '#7fa55c');
       ctx.fillStyle = g;
       ctx.fill();
       ctx.strokeStyle = 'rgba(75,129,43,.35)';
@@ -47,7 +84,7 @@
       ctx.clip();
       // luống cỏ
       ctx.globalAlpha = 0.2;
-      ctx.strokeStyle = '#d3f79b';
+      ctx.strokeStyle = '#dce8ad';
       ctx.lineWidth = 8;
       for (let k = -2; k <= 2; k++) {
         ctx.beginPath();
@@ -61,7 +98,7 @@
         const px = cx + Math.cos(seed + k * 1.9) * 35;
         const py = cy + Math.sin(seed * 1.3 + k * 2.2) * 14;
         ctx.globalAlpha = 0.7;
-        U.drawGrassTuft(ctx, px, py, 1.7, k % 2 ? '#5da536' : '#6fba42');
+        U.drawGrassTuft(ctx, px, py, 1.7, k % 2 ? '#668d48' : '#7a9d55');
       }
       ctx.globalAlpha = 1;
       if (i === 3 || i === 8) {
@@ -183,6 +220,90 @@
     ctx.restore();
   };
 
+  // Draw after the plants so each plot's next action stays easy to read.
+  ART.drawPlotStatus = function (ctx, plot, index, cx, cy, t, options) {
+    ctx.save();
+    ctx.translate(cx, cy + 18);
+    if (plot.unlocked === false) {
+      const purchase = options || {};
+      const levelMet = purchase.levelMet === true;
+      const affordable = levelMet && purchase.affordable === true;
+      const levelText = Number.isFinite(purchase.requiredLevel) ? `Cấp ${purchase.requiredLevel}` : 'Mở đất';
+      const priceText = Number.isFinite(purchase.price) ? `${purchase.price.toLocaleString('vi-VN')} vàng` : 'Chưa có giá';
+      const ink = affordable ? '#805b21' : levelMet ? '#73765f' : '#6d647f';
+      const background = affordable ? '#fff1c4' : levelMet ? '#f0efdf' : '#f0edf3';
+      const border = affordable ? '#d2ad59' : levelMet ? '#aeb095' : '#bbb2c6';
+      ctx.shadowColor = 'rgba(47,45,27,.16)'; ctx.shadowBlur = 3; ctx.shadowOffsetY = 1;
+      U.fillRR(ctx, -47, -14.5, 94, 29, 10, background);
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+      U.rr(ctx, -47, -14.5, 94, 29, 10);
+      ctx.strokeStyle = border; ctx.lineWidth = 1; ctx.stroke();
+      // Keep both requirements visible; gold means level and price are satisfied.
+      ctx.strokeStyle = ink; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.arc(-30, -8, 2.7, Math.PI, 0); ctx.stroke();
+      U.fillRR(ctx, -33.5, -8, 7, 6, 1.3, ink);
+      ctx.fillStyle = background;
+      ctx.beginPath(); ctx.arc(-30, -5.5, .8, 0, TAU); ctx.fill();
+      ctx.font = '600 10px "Segoe UI", sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = ink;
+      ctx.fillText(levelText, 5, -6, 62);
+      ctx.font = '600 10.5px "Segoe UI", sans-serif';
+      ctx.fillText(priceText, 0, 6.5, 82);
+      ctx.restore();
+      return;
+    }
+    if (!plot.tilled) {
+      ctx.fillStyle = 'rgba(249,247,226,.62)';
+      ctx.beginPath(); ctx.arc(0, 0, 8, 0, TAU); ctx.fill();
+      ctx.strokeStyle = '#587442'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-3, 0); ctx.lineTo(3, 0);
+      ctx.moveTo(0, -3); ctx.lineTo(0, 3); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    const growing = !!plot.crop;
+    const hasTimer = growing && Number.isFinite(plot.growMs) && plot.growMs > 0 && Number.isFinite(plot.startedAt);
+    const remaining = hasTimer ? Math.max(0, plot.growMs - (Date.now() - plot.startedAt)) : 0;
+    const progress = hasTimer ? clamp(1 - remaining / plot.growMs, 0, 1) : clamp(plot.progress || 0, 0, 1);
+    const ready = growing && progress >= 1;
+    const thirsty = growing && !ready && !plot.watered;
+    const text = !growing ? 'Gieo hạt' : ready ? 'Thu hoạch' : `${Math.ceil(remaining / 1000)} giây`;
+    const width = ready ? 88 : growing ? 76 : 72;
+    const foreground = thirsty ? '#356f7a' : ready ? '#42652f' : '#536b3a';
+    const background = thirsty ? '#edf7f4' : ready ? '#f0f5de' : '#fcf6e5';
+
+    ctx.shadowColor = 'rgba(47,45,27,.18)'; ctx.shadowBlur = 3; ctx.shadowOffsetY = 1;
+    U.fillRR(ctx, -width / 2, -10, width, 20, 10, background);
+    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    U.rr(ctx, -width / 2, -10, width, 20, 10);
+    ctx.strokeStyle = thirsty ? '#9dc4c3' : ready ? '#b6c890' : '#d1c5a3';
+    ctx.lineWidth = .9; ctx.stroke();
+    ctx.strokeStyle = foreground; ctx.fillStyle = foreground;
+    ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    const iconX = -width / 2 + 12;
+    if (ready) {
+      ctx.beginPath(); ctx.moveTo(iconX - 3, -.5); ctx.lineTo(iconX - .5, 2);
+      ctx.lineTo(iconX + 4, -3); ctx.stroke();
+    } else if (thirsty) {
+      ctx.beginPath(); ctx.moveTo(iconX, -5);
+      ctx.bezierCurveTo(iconX + 6, 1, iconX + 4, 4, iconX, 4);
+      ctx.bezierCurveTo(iconX - 4, 4, iconX - 6, 1, iconX, -5); ctx.fill();
+    } else {
+      ctx.beginPath(); ctx.moveTo(iconX, 3); ctx.lineTo(iconX, -2); ctx.stroke();
+      U.ellipse(ctx, iconX - 2, -2, 3, 1.6, foreground, .55);
+      U.ellipse(ctx, iconX + 2, -4, 3, 1.6, foreground, -.55);
+    }
+    ctx.font = '600 10.5px "Segoe UI", sans-serif';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = foreground;
+    ctx.fillText(text, -width / 2 + 23, growing && !ready ? -1 : .2);
+    if (growing && !ready) {
+      U.fillRR(ctx, -width / 2 + 9, 6, width - 18, 2, 1, thirsty ? '#d1e4df' : '#e0e5c8');
+      if (progress > 0) U.fillRR(ctx, -width / 2 + 9, 6, (width - 18) * progress, 2, 1, thirsty ? '#76a8ab' : '#8da85c');
+    }
+    ctx.restore();
+  };
+
   /* =========================================================
      Cây trồng
      ========================================================= */
@@ -259,7 +380,7 @@
   }
 
   function drawCarrotNew(ctx, g, ready, t, seed) {
-    const len = (24 + 37 * g);
+    const len = 20 + 26 * g;
     // củ nhô lên khi chín
     if (ready) {
       const root = ctx.createLinearGradient(-12, -12, 12, 8);
@@ -292,7 +413,8 @@
     }
     const n = 5;
     for (let i = 0; i < n; i++) {
-      const a = -Math.PI / 2 + (i - (n - 1) / 2) * 0.34;
+      // Fronds point upward already; fan them around the upright axis.
+      const a = (i - (n - 1) / 2) * 0.28;
       const l = len * (i === 2 ? 1.06 : 0.88 + (i % 2) * 0.1);
       ctx.save();
       ctx.rotate(a + Math.sin(t * 1.3 + seed + i) * 0.028);
@@ -308,22 +430,22 @@
   }
 
   function drawFernFrond(ctx, len, dark, g) {
-    ctx.strokeStyle = dark ? '#3d7d27' : '#4b8d2e';
-    ctx.lineWidth = 2.4;
+    ctx.strokeStyle = dark ? '#426b35' : '#547d3d';
+    ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.quadraticCurveTo(-2, -len * 0.55, 2, -len);
     ctx.stroke();
-    const rows = 5;
+    const rows = 4;
     for (let k = 0; k < rows; k++) {
-      const tt = 0.22 + k * 0.17;
+      const tt = 0.24 + k * 0.2;
       const yy = -len * tt;
-      const sz = (5.5 + 7 * (1 - tt)) * (0.6 + g * 0.5);
-      U.leafShape(ctx, 0, yy, sz, sz * 0.48, -0.5, dark ? '#4d9a30' : '#5cae39', '#3b7924');
-      U.leafShape(ctx, 0, yy - 1, sz * 0.9, sz * 0.42, -Math.PI + 0.5, dark ? '#458d2b' : '#53a334', '#3b7924');
+      const sz = (4 + 5 * (1 - tt)) * (0.6 + g * 0.5);
+      U.leafShape(ctx, 0, yy, sz, sz * 0.36, -0.55, dark ? '#5b873e' : '#779d4d', '#426d35');
+      U.leafShape(ctx, 0, yy - 1, sz * 0.9, sz * 0.34, -Math.PI + 0.55, dark ? '#557e3c' : '#6b9147', '#426d35');
     }
-    U.leafShape(ctx, 1, -len, 10, 4.6, -1.45, dark ? '#5aab3a' : '#6cbe45');
+    U.leafShape(ctx, 1, -len, 8, 3, -1.45, dark ? '#749948' : '#8aab57');
   }
 
   function drawTomatoNew(ctx, g, ready, t, seed) {

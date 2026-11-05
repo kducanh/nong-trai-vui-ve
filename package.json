@@ -6,7 +6,8 @@
   "description": "Nông Trại Vui Vẻ — game nông trại tuổi thơ với tài khoản, bạn bè và quản trị.",
   "scripts": {
     "start": "node server.mjs",
-    "seed:demo": "node server/seed-demo.mjs"
+    "seed:demo": "node server/seed-demo.mjs",
+    "test": "node --test tests/*.test.mjs"
   },
   "engines": {
     "node": ">=22.13"

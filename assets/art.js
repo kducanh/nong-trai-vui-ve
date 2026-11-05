@@ -239,7 +239,7 @@
 
   /* ---------------- bố cục thế giới ---------------- */
   const L = ART.layout = {
-    field: { ox: 500, oy: 300, tw: 168, th: 84, cols: 4, rows: 3 },
+    field: { ox: 510, oy: 290, tw: 200, th: 88, cols: 4, rows: 3 },
     barn: { x: 1030, baseY: 355 },
     pond: { x: 1120, y: 662, rx: 195, ry: 108 },
     tree: { x: 148, y: 588 },
@@ -322,10 +322,10 @@
   /* ---------------- trời và đồi ---------------- */
   function drawSky(ctx) {
     const sky = ctx.createLinearGradient(0, 0, 0, 260);
-    sky.addColorStop(0, '#75c9f2');
-    sky.addColorStop(0.42, '#aee5fa');
-    sky.addColorStop(0.78, '#ddf6ef');
-    sky.addColorStop(1, '#f2fbdc');
+    sky.addColorStop(0, '#a9d5d8');
+    sky.addColorStop(0.42, '#cee7df');
+    sky.addColorStop(0.78, '#edf0d9');
+    sky.addColorStop(1, '#f9efd5');
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, W, 280);
 
@@ -355,10 +355,23 @@
     ctx.lineTo(1310, 250); ctx.lineTo(-30, 250);
     ctx.closePath();
     let g = ctx.createLinearGradient(0, 110, 0, 250);
-    g.addColorStop(0, '#a9dd82');
-    g.addColorStop(1, '#8bcb63');
+    g.addColorStop(0, '#c7d4a8');
+    g.addColorStop(1, '#b2c292');
     ctx.fillStyle = g;
     ctx.fill();
+
+    // Thin rows on the far hillside give the landscape a cultivated rhythm.
+    ctx.save();
+    ctx.clip();
+    ctx.strokeStyle = 'rgba(248,245,215,.24)';
+    ctx.lineWidth = 3;
+    for (let i = 0; i < 10; i++) {
+      ctx.beginPath();
+      ctx.moveTo(720 + i * 45, 132);
+      ctx.bezierCurveTo(680 + i * 47, 168, 690 + i * 45, 198, 650 + i * 46, 244);
+      ctx.stroke();
+    }
+    ctx.restore();
 
     // lớp đồi gần hơn
     ctx.beginPath();
@@ -369,8 +382,8 @@
     ctx.lineTo(1310, 300); ctx.lineTo(-30, 300);
     ctx.closePath();
     g = ctx.createLinearGradient(0, 160, 0, 300);
-    g.addColorStop(0, '#8ed162');
-    g.addColorStop(1, '#72bd49');
+    g.addColorStop(0, '#a4bd88');
+    g.addColorStop(1, '#8fac73');
     ctx.fillStyle = g;
     ctx.fill();
 
@@ -381,22 +394,22 @@
       const y = 210 + Math.sin(i * 0.7) * 12 + rnd() * 18;
       const s = 10 + rnd() * 14;
       ctx.globalAlpha = 0.55;
-      ellipse(ctx, x, y - s * 0.7, s * 0.8, s * 0.85, i % 3 === 0 ? '#4d8e42' : '#5da14a');
-      ellipse(ctx, x + s * 0.3, y - s * 1.1, s * 0.55, s * 0.6, '#6aad55');
+      ellipse(ctx, x, y - s * 0.7, s * 0.8, s * 0.85, i % 3 === 0 ? '#779266' : '#849f70');
+      ellipse(ctx, x + s * 0.3, y - s * 1.1, s * 0.55, s * 0.6, '#9bb482');
       ctx.globalAlpha = 1;
     }
     // vài cây thông nhỏ
     for (let i = 0; i < 8; i++) {
       const x = 60 + i * 163 + (i % 2) * 30;
       const y = 208 - (i % 3) * 3;
-      ctx.fillStyle = '#4f8f45';
+      ctx.fillStyle = '#6b8960';
       ctx.beginPath();
       ctx.moveTo(x, y - 36);
       ctx.lineTo(x + 13, y);
       ctx.lineTo(x - 13, y);
       ctx.closePath();
       ctx.fill();
-      ctx.fillStyle = '#5fa351';
+      ctx.fillStyle = '#88a373';
       ctx.beginPath();
       ctx.moveTo(x, y - 48);
       ctx.lineTo(x + 10, y - 18);
@@ -413,15 +426,15 @@
     ctx.bezierCurveTo(1110, 232, 1220, 252, 1300, 240);
     ctx.lineTo(1300, 300); ctx.lineTo(-20, 300);
     ctx.closePath();
-    ctx.fillStyle = '#7cc84f';
+    ctx.fillStyle = '#a5bc7d';
     ctx.fill();
   }
 
   function drawGround(ctx) {
     const g = ctx.createLinearGradient(0, 200, 0, H);
-    g.addColorStop(0, '#8fd65c');
-    g.addColorStop(0.45, '#78c64a');
-    g.addColorStop(1, '#5aab35');
+    g.addColorStop(0, '#b0c78a');
+    g.addColorStop(0.45, '#95b570');
+    g.addColorStop(1, '#729653');
     ctx.fillStyle = g;
     ctx.beginPath();
     ctx.moveTo(-20, 252);
@@ -434,10 +447,16 @@
 
     ctx.save();
     ctx.clip();
+    const light = ctx.createRadialGradient(535, 320, 40, 535, 320, 700);
+    light.addColorStop(0, 'rgba(255,248,191,.23)');
+    light.addColorStop(0.58, 'rgba(255,248,191,.04)');
+    light.addColorStop(1, 'rgba(39,71,44,.15)');
+    ctx.fillStyle = light;
+    ctx.fillRect(0, 230, W, H);
     // dải cỏ mowed mềm
     const rnd = makeRand(1234);
     for (let i = 0; i < 9; i++) {
-      ctx.globalAlpha = 0.055;
+      ctx.globalAlpha = 0.032;
       ctx.fillStyle = i % 2 ? '#ffffff' : '#2e6b21';
       ctx.beginPath();
       const x = -200 + i * 190;
@@ -450,10 +469,10 @@
     }
     ctx.globalAlpha = 1;
     // đốm cỏ
-    for (let i = 0; i < 850; i++) {
+    for (let i = 0; i < 650; i++) {
       const x = rnd() * W, y = 256 + rnd() * (H - 240);
-      ctx.globalAlpha = 0.1 + rnd() * 0.16;
-      ctx.fillStyle = rnd() > 0.5 ? '#3e8d2e' : '#b3e77e';
+      ctx.globalAlpha = 0.08 + rnd() * 0.12;
+      ctx.fillStyle = rnd() > 0.5 ? '#5e814b' : '#d3dca1';
       const s = 0.6 + rnd() * 1.7;
       ctx.beginPath();
       ctx.ellipse(x, y, s * 1.8, s * 0.8, 0, 0, TAU);
@@ -465,7 +484,7 @@
       const x = 20 + rnd() * (W - 40);
       const y = 270 + rnd() * (H - 280);
       ctx.globalAlpha = 0.32 + rnd() * 0.35;
-      drawGrassTuft(ctx, x, y, 1.6 + rnd() * 2.6, rnd() > 0.5 ? '#4c9a33' : '#6dbb43');
+      drawGrassTuft(ctx, x, y, 1.6 + rnd() * 2.6, rnd() > 0.5 ? '#718d53' : '#90a85f');
     }
     ctx.globalAlpha = 1;
     // hoa dại
@@ -505,12 +524,12 @@
     ctx.scale(s, s);
     ctx.globalAlpha = 0.95;
     ellipse(ctx, 0, 6, 34, 12, 'rgba(50,95,28,.2)');
-    ellipse(ctx, -16, -5, 19, 17, '#4b9a37');
-    ellipse(ctx, 7, -11, 24, 21, '#5cae41');
-    ellipse(ctx, 24, 0, 16, 14, '#4d9f39');
-    ellipse(ctx, -2, -18, 15, 12, '#70c050');
+    ellipse(ctx, -16, -5, 19, 17, '#5c804e');
+    ellipse(ctx, 7, -11, 24, 21, '#779653');
+    ellipse(ctx, 24, 0, 16, 14, '#638449');
+    ellipse(ctx, -2, -18, 15, 12, '#96ad68');
     ctx.globalAlpha = 0.5;
-    ellipse(ctx, -8, -14, 8, 5, '#a4e47e');
+    ellipse(ctx, -8, -14, 8, 5, '#c0ce89');
     ctx.restore();
   }
 
@@ -596,6 +615,21 @@
     ctx.fill();
     ctx.restore();
 
+    // The front timber faces give the raised bed a clear thickness.
+    [[1, 2, '#987346'], [2, 3, '#b48b53']].forEach(([a, b, color]) => {
+      ctx.beginPath();
+      ctx.moveTo(p2[a].x, p2[a].y);
+      ctx.lineTo(p2[b].x, p2[b].y);
+      ctx.lineTo(p2[b].x, p2[b].y + 12);
+      ctx.lineTo(p2[a].x, p2[a].y + 12);
+      ctx.closePath();
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(91,67,37,.35)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+
     // viền đất
     ctx.beginPath();
     p2.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
@@ -612,9 +646,9 @@
     inner.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
     ctx.closePath();
     const g = ctx.createLinearGradient(0, 250, 0, 560);
-    g.addColorStop(0, '#84cf52');
-    g.addColorStop(0.5, '#73c044');
-    g.addColorStop(1, '#5faa36');
+    g.addColorStop(0, '#a2bb78');
+    g.addColorStop(0.5, '#8cac64');
+    g.addColorStop(1, '#729553');
     ctx.fillStyle = g;
     ctx.fill();
 
@@ -622,7 +656,7 @@
     ctx.save();
     ctx.clip();
     ctx.globalAlpha = 0.14;
-    ctx.strokeStyle = '#c9f28f';
+    ctx.strokeStyle = '#d6dda3';
     ctx.lineWidth = 12;
     for (let i = -4; i < 12; i++) {
       ctx.beginPath();
@@ -637,7 +671,7 @@
       const x = 250 + rnd() * 590;
       const y = 260 + rnd() * 290;
       ctx.globalAlpha = 0.22 + rnd() * 0.25;
-      drawGrassTuft(ctx, x, y, 1.1 + rnd() * 1.4, '#5da536');
+      drawGrassTuft(ctx, x, y, 1.1 + rnd() * 1.4, '#7c9757');
     }
     ctx.restore();
 
@@ -680,11 +714,11 @@
 
     // đá nhỏ & hoa quanh ruộng
     ctx.globalAlpha = 0.85;
-    drawFlower(ctx, 238, 478, 1.8, '#fff5df');
-    drawFlower(ctx, 846, 410, 1.7, '#ffe27a');
-    drawFlower(ctx, 820, 446, 1.5, '#fff');
-    drawGrassTuft(ctx, 262, 512, 3, '#5aa335');
-    drawGrassTuft(ctx, 826, 388, 2.6, '#5aa335');
+    drawFlower(ctx, L.fieldPoly(22)[3].x, L.fieldPoly(22)[3].y + 20, 1.8, '#fff5df');
+    drawFlower(ctx, L.fieldPoly(22)[1].x, L.fieldPoly(22)[1].y + 10, 1.7, '#ffe27a');
+    drawFlower(ctx, L.fieldPoly(12)[1].x - 4, L.fieldPoly(12)[1].y + 28, 1.5, '#fff');
+    drawGrassTuft(ctx, L.fieldPoly(20)[3].x - 4, L.fieldPoly(20)[3].y + 32, 3, '#7c9757');
+    drawGrassTuft(ctx, L.fieldPoly(20)[1].x + 3, L.fieldPoly(20)[1].y - 6, 2.6, '#7c9757');
     ctx.globalAlpha = 1;
   }
 
@@ -1008,7 +1042,7 @@
     ctx.fillStyle = '#8d5a2d';
     fillRR(ctx, -5, -32, 10, 40, 4, '#8d5a2d');
     ellipse(ctx, -16, -44, 22, 18, '#4f9b36');
-    ellipse(ctx, 12, -48, 25, 21, '#5cae41');
+    ellipse(ctx, 12, -48, 25, 21, '#779653');
     ellipse(ctx, 0, -60, 20, 17, '#6cbd4b');
     ellipse(ctx, -4, -50, 10, 7, 'rgba(190,235,140,.55)');
     ctx.restore();
@@ -1713,12 +1747,12 @@
     for (let i = 0; i < 20; i++) {
       const x = 20 + rnd() * 180;
       const y = 690 + rnd() * 20;
-      drawGrassTuft(ctx, x, y, 4 + rnd() * 5, '#4b972f');
+      drawGrassTuft(ctx, x, y, 4 + rnd() * 5, '#53764a');
     }
     for (let i = 0; i < 14; i++) {
       const x = 1160 + rnd() * 120;
       const y = 700 + rnd() * 15;
-      drawGrassTuft(ctx, x, y, 4 + rnd() * 4, '#4b972f');
+      drawGrassTuft(ctx, x, y, 4 + rnd() * 4, '#53764a');
     }
     drawFlower(ctx, 252, 712, 2.6, '#ffe27a');
     drawFlower(ctx, 986, 708, 2.4, '#fff6e3');
@@ -1752,46 +1786,113 @@
     drawGround(ctx);
     drawGardenPath(ctx);
     drawGardenFence(ctx);
+    drawGardenLandscaping(ctx);
     drawFieldBase(ctx);
-    drawToolShed(ctx, 1015, 402);
-    drawScarecrow(ctx, 866, 438);
+    // Keep the field dominant and reserve the upper-right meadow for crop details.
+    ctx.save();
+    ctx.translate(1115, 560);
+    ctx.scale(.48, .48);
+    drawToolShed(ctx, 0, 0);
+    ctx.restore();
+    ctx.save();
+    ctx.translate(954, 467);
+    ctx.scale(.55, .55);
+    drawScarecrow(ctx, 0, 0);
+    ctx.restore();
     drawGardenProps(ctx);
     drawForegroundGarden(ctx);
   }
 
   function drawGardenPath(ctx) {
+    ctx.save();
     const p = new Path2D();
     p.moveTo(-50, 665);
     p.bezierCurveTo(190, 610, 400, 660, 610, 590);
-    p.bezierCurveTo(760, 543, 860, 530, 950, 438);
-    ctx.strokeStyle = '#ad9060';
-    ctx.lineWidth = 104;
+    p.bezierCurveTo(775, 563, 950, 577, 1115, 553);
     ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(65,84,45,.13)';
+    ctx.lineWidth = 116;
     ctx.stroke(p);
-    ctx.strokeStyle = '#d9c496';
-    ctx.lineWidth = 90;
+    ctx.strokeStyle = '#bba978';
+    ctx.lineWidth = 104;
     ctx.stroke(p);
-    ctx.strokeStyle = '#ebddb6';
-    ctx.lineWidth = 66;
+    ctx.strokeStyle = '#ddd0a6';
+    ctx.lineWidth = 94;
     ctx.stroke(p);
-    // sân nhà dụng cụ
-    ctx.beginPath();
-    ctx.ellipse(1004, 470, 160, 74, -0.08, 0, TAU);
-    ctx.fillStyle = '#e5d2a3';
-    ctx.fill();
-    // sỏi + cỏ ven đường
+    ctx.strokeStyle = '#eadfbd';
+    ctx.lineWidth = 71;
+    ctx.stroke(p);
+    ctx.strokeStyle = 'rgba(255,246,215,.38)';
+    ctx.lineWidth = 38;
+    ctx.stroke(p);
+    // The yard and stepping stones connect the path to the shed door.
+    ellipse(ctx, 1115, 552, 112, 42, '#c9bd93', -0.08);
+    ellipse(ctx, 1115, 549, 110, 40, '#e1d4af', -0.08);
     const rnd = makeRand(701);
-    for (let i = 0; i < 34; i++) {
-      const x = 40 + rnd() * 930;
-      const y = 520 + rnd() * 120;
-      ctx.globalAlpha = 0.35 + rnd() * 0.25;
-      drawStone(ctx, x, y, 1.8 + rnd() * 3.5, 1.1 + rnd() * 2.2, rnd(), rnd() > 0.5 ? '#d7cbb1' : '#c7b899');
+    for (let i = 0; i < 100; i++) {
+      const x = 1010 + rnd() * 210, y = 516 + rnd() * 70;
+      if (((x - 1115) / 105) ** 2 + ((y - 549) / 35) ** 2 > 1) continue;
+      ellipse(ctx, x, y, 1 + rnd() * 2, 0.5 + rnd(), 'rgba(151,125,83,.17)');
     }
-    ctx.globalAlpha = 0.8;
+    [[1106, 569, 14, 4], [1082, 578, 16, 5], [1055, 581, 17, 5]].forEach(([x,y,rx,ry]) => {
+      ellipse(ctx, x + 2, y + 3, rx + 2, ry + 1, 'rgba(106,93,63,.15)', -.12);
+      drawStone(ctx, x, y, rx, ry, -.12, '#c4bca0');
+      ctx.beginPath(); ctx.ellipse(x - 2, y - 2, rx * .7, ry * .48, -.12, Math.PI, TAU);
+      ctx.strokeStyle = 'rgba(255,250,224,.55)'; ctx.lineWidth = 1.5; ctx.stroke();
+    });
+    for (let i = 0; i < 42; i++) {
+      const x = 40 + rnd() * 930, y = 520 + rnd() * 120;
+      ctx.globalAlpha = 0.3 + rnd() * 0.2;
+      drawStone(ctx, x, y, 1.8 + rnd() * 3.5, 1.1 + rnd() * 2.2, rnd(), '#b8ad8c');
+    }
+    ctx.globalAlpha = .7;
     for (let i = 0; i < 16; i++) {
-      drawGrassTuft(ctx, 40 + rnd() * 950, 560 + rnd() * 100, 1.2 + rnd() * 1.4, '#86b852');
+      drawGrassTuft(ctx, 40 + rnd() * 950, 560 + rnd() * 100, 1.2 + rnd() * 1.4, '#879f60');
     }
-    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  function drawGardenLandscaping(ctx) {
+    // All ornamental work is cached once with the scene, never per frame.
+    function tree(x, y, scale, seed) {
+      ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale);
+      const shade = ctx.createRadialGradient(24, 4, 4, 24, 4, 116);
+      shade.addColorStop(0, 'rgba(48,72,40,.17)');
+      shade.addColorStop(1, 'rgba(48,72,40,0)');
+      ctx.save(); ctx.scale(1, .32); ctx.fillStyle = shade; ctx.fillRect(-120, -120, 270, 240); ctx.restore();
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#7a7150'; ctx.lineWidth = 17;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(-7, -62, 2, -122); ctx.stroke();
+      ctx.strokeStyle = '#a79668'; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(-4, -6); ctx.quadraticCurveTo(-10, -60, -1, -106); ctx.stroke();
+      ctx.strokeStyle = '#7a7150'; ctx.lineWidth = 8;
+      ctx.beginPath(); ctx.moveTo(-1,-63); ctx.lineTo(-35,-103); ctx.moveTo(0,-72);ctx.lineTo(30,-115);ctx.stroke();
+      const rnd = makeRand(seed);
+      const clusters = [[-47,-118,48], [35,-121,53], [-10,-157,61], [-42,-164,35], [28,-170,43]];
+      clusters.forEach(([cx, cy, r], i) => {
+        const foliage = ctx.createRadialGradient(cx - r*.3, cy - r*.4, 4, cx, cy, r);
+        foliage.addColorStop(0, i % 2 ? '#acc183' : '#9eb77a');
+        foliage.addColorStop(.63, '#799953');
+        foliage.addColorStop(1, '#5f824b');
+        blobPath(ctx,cx,cy,r,r*.82,[1,.94,1.05,.93,1.02,.95,1,.95,1.05,.94],.1);ctx.fillStyle=foliage;ctx.fill();
+        for(let j=0;j<9;j++){
+          const a=rnd()*TAU,rad=rnd()*r*.65;
+          ellipse(ctx,cx+Math.cos(a)*rad,cy+Math.sin(a)*rad*.7,3+rnd()*4,2+rnd()*2,'rgba(220,229,168,.15)',-.4);
+        }
+      });
+      ctx.restore();
+    }
+    tree(75, 486, 1.05, 781);
+    tree(1322, 520, .75, 782);
+    // Lavender and daisies nestle beside the fence and shed.
+    [[1211,574], [179,481], [297,578]].forEach(([x,y],j) => {
+      ellipse(ctx,x,y+2,24,8,'rgba(68,88,47,.12)');
+      for (let i=0;i<7;i++) {
+        const px=x-19+i*6, py=y+(i%3)*2;
+        drawGrassTuft(ctx,px,py,3,'#71884e');
+        drawFlower(ctx,px,py-2,1.8,i%3 ? '#eee9cb' : '#b5a6be');
+      }
+    });
   }
 
   function drawGardenFence(ctx) {
@@ -1823,9 +1924,9 @@
     ctx.fill();
     // thân nhà
     const wall = ctx.createLinearGradient(x - 110, 0, x + 110, 0);
-    wall.addColorStop(0, '#c98b4b');
-    wall.addColorStop(0.55, '#e3b06e');
-    wall.addColorStop(1, '#a86c33');
+    wall.addColorStop(0, '#d2aa72');
+    wall.addColorStop(0.55, '#e4c18c');
+    wall.addColorStop(1, '#b28a57');
     U.rr(ctx, x - 112, base - 152, 224, 158, 6);
     ctx.fillStyle = wall;
     ctx.fill();
@@ -1844,6 +1945,19 @@
       ctx.stroke();
     }
     ctx.globalAlpha = 1;
+    // Fine grain and the eave shadow make the timber feel less flat.
+    ctx.save();
+    const grain = makeRand(438);
+    for (let i = 0; i < 36; i++) {
+      const gx = x - 105 + grain() * 210;
+      const gy = base - 139 + grain() * 130;
+      ctx.strokeStyle = 'rgba(126,87,47,.13)';
+      ctx.lineWidth = .8;
+      ctx.beginPath(); ctx.moveTo(gx, gy); ctx.quadraticCurveTo(gx - 2, gy + 8, gx, gy + 17); ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(83,56,36,.16)';
+    ctx.fillRect(x - 110, base - 145, 220, 16);
+    ctx.restore();
     // mái đỏ
     ctx.beginPath();
     ctx.moveTo(x - 140, base - 148);
@@ -1853,8 +1967,9 @@
     ctx.lineTo(x - 120, base - 138);
     ctx.closePath();
     const roof = ctx.createLinearGradient(0, base - 245, 0, base - 135);
-    roof.addColorStop(0, '#e27455');
-    roof.addColorStop(1, '#aa4132');
+    roof.addColorStop(0, '#d78d71');
+    roof.addColorStop(.35, '#bd745a');
+    roof.addColorStop(1, '#995944');
     ctx.fillStyle = roof;
     ctx.fill();
     ctx.strokeStyle = '#6f3024';
@@ -1877,6 +1992,14 @@
       ctx.beginPath();
       ctx.moveTo(x - 130 + i * 37, base - 135);
       ctx.lineTo(x - 80 + i * 37, base - 240);
+      ctx.stroke();
+    }
+    ctx.strokeStyle = 'rgba(255,222,181,.45)';
+    ctx.lineWidth = 1.2;
+    for (let row = 0; row < 5; row++) {
+      ctx.beginPath();
+      ctx.moveTo(x - 142, base - 143 - row * 19);
+      ctx.quadraticCurveTo(x, base - 132 - row * 19, x + 150, base - 143 - row * 19);
       ctx.stroke();
     }
     ctx.restore();
@@ -1926,6 +2049,18 @@
     ctx.textBaseline = 'middle';
     ctx.fillText('DỤNG CỤ', 0, 0);
     ctx.restore();
+    // A stone doorstep and a small brass lantern add a lived-in finish.
+    fillRR(ctx, x - 40, base + 1, 80, 8, 3, '#a49a7c');
+    fillRR(ctx, x - 39, base - 1, 78, 5, 3, '#dad0b1');
+    ctx.strokeStyle = '#675c42'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(x - 53, base - 102); ctx.lineTo(x - 53, base - 112); ctx.lineTo(x - 62, base - 112); ctx.stroke();
+    fillRR(ctx, x - 69, base - 108, 14, 19, 3, '#6a7052');
+    fillRR(ctx, x - 66, base - 105, 8, 12, 2, '#f6da8c');
+    ellipse(ctx, x - 62, base - 88, 9, 2, '#5c6348');
+    for (let i = 0; i < 8; i++) {
+      const ivyY = base - 42 - i * 11;
+      leafShape(ctx, x + 108, ivyY, 13, 5, i % 2 ? -2.8 : -.5, i % 2 ? '#668348' : '#8c9d58');
+    }
     // dụng cụ dựa tường
     ctx.strokeStyle = '#9a6633';
     ctx.lineWidth = 4;
@@ -2038,31 +2173,25 @@
   }
 
   function drawGardenProps(ctx) {
-    // xe cút kít
-    drawWheelbarrow(ctx, 736, 548);
-    // biển vườn rau
-    drawSign(ctx, 792, 506, 110, 34, 'VƯỜN RAU', 0.13, '#d8a35d');
-    // thùng gỗ, bí, thùng tưới
-    drawCrate(ctx, 1214, 468, 0.72);
-    drawCrate(ctx, 1188, 488, 0.5);
-    drawPumpkin(ctx, 1118, 486, 0.9, '#e98a2d');
-    drawPumpkin(ctx, 1150, 494, 0.6, '#d97822');
-    drawHayBale(ctx, 920, 494, 0.8, -0.05);
-    drawHayBale(ctx, 966, 486, 0.55, 0.04);
-    // thùng nước mưa
-    drawRainBarrel(ctx, 984, 520, 0.8);
-    // đống phân xanh / thùng compost
-    drawCompost(ctx, 254, 548, 0.9);
-    // bụi hoa, nấm, đá
-    drawRoseBush(ctx, 1208, 570, 0.9);
-    drawRoseBush(ctx, 236, 600, 0.8);
-    drawMushroom(ctx, 312, 582, 0.6);
-    drawFlower(ctx, 210, 500, 1.8, '#fff1de');
-    drawFlower(ctx, 1180, 540, 1.6, '#ffe076');
-    drawFlower(ctx, 674, 574, 1.6, '#ffd9e3');
-    // cọc nhỏ & dây leo
-    drawFencePost(ctx, 700, 230, 38, 7);
-    drawGrassTuft(ctx, 700, 560, 3, '#5aa335');
+    // Small working-yard accents sit beyond the twelve planting targets.
+    ctx.save();
+    ctx.translate(1000, 558);
+    ctx.scale(.58, .58);
+    drawWheelbarrow(ctx, 0, 0);
+    ctx.restore();
+    drawSign(ctx, 858, 529, 82, 25, 'VƯỜN RAU', .07, '#cfad77');
+    drawCrate(ctx, 1200, 545, .48);
+    drawPumpkin(ctx, 1182, 571, .52, '#cf8b45');
+    drawHayBale(ctx, 1210, 575, .48, -.05);
+    drawRainBarrel(ctx, 1051, 553, .52);
+    drawCompost(ctx, 236, 552, .64);
+    drawRoseBush(ctx, 1222, 601, .64);
+    drawRoseBush(ctx, 208, 600, .64);
+    drawMushroom(ctx, 285, 578, .5);
+    drawFlower(ctx, 194, 502, 1.8, '#fff1de');
+    drawFlower(ctx, 1170, 599, 1.6, '#ffe076');
+    drawFlower(ctx, 674, 585, 1.6, '#ffd9e3');
+    drawGrassTuft(ctx, 927, 489, 3, '#7c9757');
   }
 
   function drawRainBarrel(ctx, x, y, s) {
@@ -2122,8 +2251,8 @@
   function drawForegroundGarden(ctx) {
     const rnd = makeRand(913);
     for (let i = 0; i < 13; i++) {
-      drawGrassTuft(ctx, 20 + rnd() * 160, 700 + rnd() * 16, 4 + rnd() * 4, '#4b972f');
-      drawGrassTuft(ctx, 1120 + rnd() * 140, 702 + rnd() * 12, 4 + rnd() * 3, '#4b972f');
+      drawGrassTuft(ctx, 20 + rnd() * 160, 700 + rnd() * 16, 4 + rnd() * 4, '#53764a');
+      drawGrassTuft(ctx, 1120 + rnd() * 140, 702 + rnd() * 12, 4 + rnd() * 3, '#53764a');
     }
     drawFlower(ctx, 384, 704, 2.4, '#ffe27a');
     drawFlower(ctx, 1006, 700, 2.2, '#fff6e3');

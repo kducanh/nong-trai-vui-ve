@@ -17,6 +17,7 @@
   const friendCanvas = $('#friendCanvas');
   const friendCtx = friendCanvas.getContext('2d');
   const areaPage = $('#areaPage');
+  const plazaPage = $('#plazaPage');
   const areaCanvas = $('#areaCanvas');
   const areaCtx = areaCanvas.getContext('2d');
   const areaDock = $('#areaDock');
@@ -127,9 +128,9 @@
   };
 
   const CHAIN = [
-    { id: 'q1', type: 'till', need: 3, title: 'Cuốc 3 ô đất', reward: { coins: 40, xp: 10 } },
+    { id: 'q1', type: 'till', need: 2, title: 'Cuốc 2 ô đất', reward: { coins: 40, xp: 10 } },
     { id: 'q2', type: 'plant', crop: 'carrot', need: 2, title: 'Gieo 2 hạt cà rốt', reward: { coins: 50, xp: 15, seeds: { carrot: 2 } } },
-    { id: 'q3', type: 'water', need: 3, title: 'Tưới nước 3 ô', reward: { coins: 40, xp: 10, items: { fertilizer: 1 } } },
+    { id: 'q3', type: 'water', need: 2, title: 'Tưới nước 2 ô', reward: { coins: 40, xp: 10, items: { fertilizer: 1 } } },
     { id: 'q4', type: 'harvest', need: 2, title: 'Thu hoạch 2 cây', reward: { coins: 80, xp: 20 } },
     { id: 'q5', type: 'sell', need: 3, title: 'Bán 3 nông sản', reward: { coins: 60, xp: 15 } },
     { id: 'q6', type: 'buySeed', need: 1, title: 'Mua 1 gói hạt giống', reward: { coins: 30, xp: 10 } },
@@ -175,19 +176,11 @@
     return out;
   }
 
-  function fresh(withPlants) {
+  function fresh() {
     const t = now();
-    const plots = Array.from({ length: 12 }, () => ({
-      tilled: false, crop: null, startedAt: 0, growMs: 0, watered: false, fertilized: false, progress: 0
+    const plots = Array.from({ length: 12 }, (_, i) => ({
+      unlocked: LAND.initiallyUnlocked(i), tilled: false, crop: null, startedAt: 0, growMs: 0, watered: false, fertilized: false, progress: 0
     }));
-    if (withPlants) {
-      plots[1] = { tilled: true, crop: 'carrot', startedAt: t - 24000, growMs: 30000, watered: true, fertilized: false, progress: 0 };
-      plots[4] = { tilled: true, crop: 'tomato', startedAt: t - 25000, growMs: 45000, watered: false, fertilized: false, progress: 0 };
-      plots[7] = { tilled: true, crop: 'carrot', startedAt: t - 28500, growMs: 30000, watered: true, fertilized: false, progress: 0 };
-      plots[10] = { tilled: true, crop: 'carrot', startedAt: t - 38000, growMs: 30000, watered: true, fertilized: false, progress: 0 };
-      plots[9] = { tilled: true, crop: 'tomato', startedAt: t - 13000, growMs: 45000, watered: false, fertilized: false, progress: 0 };
-      plots[11] = { tilled: true, crop: null, startedAt: 0, growMs: 0, watered: false, fertilized: false, progress: 0 };
-    }
     const animals = [
       { id: 'cow', type: 'cow', name: 'Bò Sữa', x: 804, y: 322, homeX: 804, homeY: 322, dir: -1, phase: 0.4, state: 'hungry', fedAt: 0, readyAt: 0, moving: false, waitUntil: t + 2600, targetX: 804, targetY: 322 },
       { id: 'hen1', type: 'chicken', name: 'Gà Mơ', x: 758, y: 344, homeX: 758, homeY: 344, dir: 1, phase: 1.7, variant: 0, state: 'hungry', fedAt: 0, readyAt: 0, moving: false, waitUntil: t + 3600, targetX: 758, targetY: 344 },
@@ -214,7 +207,7 @@
   }
 
   function normalize(saved) {
-    const s = fresh(false);
+    const s = fresh();
     s.createdAt = saved.createdAt || s.createdAt;
     s.player = Object.assign({}, s.player, saved.player || {});
     s.player.level = clamp(Math.round(s.player.level || 1), 1, 10);
@@ -252,7 +245,7 @@
       }
     });
     s.plots = Array.from({ length: 12 }, (_, i) => {
-      const p = Object.assign({}, s.plots[i], (saved.plots && saved.plots[i]) || {});
+      const p = LAND.normalizePlot(Object.assign({}, s.plots[i], (saved.plots && saved.plots[i]) || {}), i);
       if (p.crop && !CROPS[p.crop]) p.crop = null;
       if (!p.crop) {
         p.startedAt = 0; p.growMs = 0; p.watered = false; p.fertilized = false;
@@ -284,15 +277,15 @@
   }
 
   function loadState() {
-    if (FRESH) return fresh(true);
+    if (FRESH) return fresh();
     try {
       const raw = localStorage.getItem(KEY);
-      if (!raw) return fresh(true);
+      if (!raw) return fresh();
       const saved = JSON.parse(raw);
-      if (!saved || saved.version !== VERSION) return fresh(true);
+      if (!saved || saved.version !== VERSION) return fresh();
       return normalize(saved);
     } catch (e) {
-      return fresh(true);
+      return fresh();
     }
   }
 
@@ -303,6 +296,7 @@
   let shopTab = 'seeds';
   let shopQty = 1;
   let modalType = null;
+  let landPlotIndex = null;
   let hover = null;
   let pointer = { x: 0, y: 0 };
   let fishing = { phase: null, biteAt: 0, until: 0 };
@@ -607,8 +601,20 @@
   function updateToolUI() {
     $$('.tool[data-tool]').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.tool === currentTool);
+      btn.setAttribute('aria-pressed', String(btn.dataset.tool === currentTool));
       btn.title = (TOOL_NAMES[btn.dataset.tool] || '') + ' (' + (TOOL_KEYS.indexOf(btn.dataset.tool) + 1) + ')';
     });
+    const hints = {
+      hand: ['Ngắm khu vườn', 'Chạm cây để xem; chạm cây chín để thu.'],
+      hoe: ['Cuốc đất', 'Cuốc ô đã mở; chạm ô có khóa để mua đất.'],
+      seed: ['Gieo ' + CROPS[selectedSeed].name, (state.seeds[selectedSeed] || 0) > 0 ? 'Chạm ô đất đã cuốc để gieo hạt.' : 'Đã hết hạt. Mua thêm ở khay hạt giống.'],
+      water: ['Tưới nước', 'Chạm cây có giọt nước để giúp cây lớn nhanh.'],
+      fertilize: ['Bón phân', 'Bón cho cây đang lớn để thu thêm nông sản.'],
+      harvest: ['Thu hoạch', 'Chạm luống có dấu ✓ để hái nông sản.']
+    };
+    const hintName = $('#toolHintName'), hintText = $('#toolHintText');
+    if (hintName.textContent !== hints[currentTool][0]) hintName.textContent = hints[currentTool][0];
+    if (hintText.textContent !== hints[currentTool][1]) hintText.textContent = hints[currentTool][1];
   }
 
   function makeIconCanvas(id) {
@@ -630,6 +636,12 @@
       btn.dataset.seed = id;
       btn.title = CROPS[id].name;
       const cv = makeIconCanvas('seed_' + id);
+      const copy = document.createElement('span');
+      copy.className = 'seed-card-copy';
+      const name = document.createElement('b');
+      name.textContent = CROPS[id].name;
+      const detail = document.createElement('small');
+      copy.append(name, detail);
       const count = document.createElement('span');
       count.className = 'seed-count';
       count.textContent = '0';
@@ -637,10 +649,11 @@
       lock.className = 'mini-lock hidden';
       lock.textContent = 'C' + CROPS[id].unlock;
       btn.appendChild(cv);
+      btn.appendChild(copy);
       btn.appendChild(count);
       btn.appendChild(lock);
       el.seedBar.appendChild(btn);
-      seedEls[id] = { btn, count, lock };
+      seedEls[id] = { btn, count, lock, detail };
     });
     updateSeedBar();
   }
@@ -652,11 +665,15 @@
       const qty = state.seeds[id] || 0;
       const locked = state.player.level < CROPS[id].unlock;
       s.count.textContent = qty;
+      s.detail.textContent = locked ? `Cấp ${CROPS[id].unlock}` : `${CROPS[id].grow} giây`;
       s.btn.classList.toggle('active', selectedSeed === id && currentTool === 'seed');
+      s.btn.setAttribute('aria-pressed', String(selectedSeed === id && currentTool === 'seed'));
+      s.btn.setAttribute('aria-disabled', String(locked));
       s.btn.classList.toggle('empty', qty <= 0);
       s.btn.classList.toggle('locked', locked);
       s.lock.classList.toggle('hidden', !locked);
       s.btn.title = `${CROPS[id].name} • Có ${qty} hạt` + (locked ? ` • Mở khóa cấp ${CROPS[id].unlock}` : '');
+      s.btn.setAttribute('aria-label', s.btn.title);
     });
     updateSeedInfo();
   }
@@ -666,8 +683,12 @@
     const c = CROPS[selectedSeed];
     if (!c) return;
     el.seedInfoName.textContent = c.name;
-    el.seedInfoMeta.textContent = `${c.grow} giây • bán ${c.sell} vàng`;
+    el.seedInfoMeta.textContent = c.blurb;
     el.seedInfoCount.textContent = `Còn ${state.seeds[selectedSeed] || 0} hạt`;
+    $('#seedGrowTime').textContent = c.grow + ' giây';
+    $('#seedYield').textContent = c.yield + ' nông sản';
+    $('#seedSellPrice').textContent = c.sell + ' vàng';
+    $('#seedXp').textContent = '+' + c.xp + ' XP';
     if (seedInfoShown !== selectedSeed && el.seedInfoIcon) {
       const cv = el.seedInfoIcon;
       const cctx = cv.getContext('2d');
@@ -680,12 +701,25 @@
   }
 
   function updateFarmUI() {
-    let ready = 0, thirsty = 0;
+    let ready = 0, thirsty = 0, planted = 0, empty = 0, owned = 0;
     state.plots.forEach(p => {
-      if (!p.crop) return;
-      if ((p.progress || 0) >= 1) ready++;
+      if (p.unlocked === false) return;
+      owned++;
+      if (!p.crop) { if (p.tilled) empty++; return; }
+      planted++;
+      if (plotProgress(p) >= 1) ready++;
       else if (!p.watered) thirsty++;
     });
+    $('#gardenPlanted').textContent = planted + ' ô có cây';
+    $('#gardenOwned').textContent = 'Đã mở ' + owned + ' / ' + state.plots.length + ' ô';
+    $('#expandLandBtn').disabled = owned === state.plots.length;
+    const nextLand = LAND.nextLocked(state.plots);
+    const nextLevel = LAND.levelFor(nextLand);
+    $('#expandLandLabel').textContent = nextLand < 0 ? 'Hoàn tất ✓' : state.player.level < nextLevel ? 'Cần cấp ' + nextLevel : 'Mở đất ＋';
+    $('#expandLandBtn').title = nextLand < 0 ? 'Đã mở toàn bộ đất' : `Ô tiếp theo: cấp ${nextLevel} + ${fmt(LAND.priceFor(nextLand))} vàng`;
+    $('#gardenReady').textContent = ready;
+    $('#gardenThirsty').textContent = thirsty;
+    $('#gardenEmpty').textContent = empty;
     if (el.waterAllCount) el.waterAllCount.textContent = thirsty;
     if (el.harvestAllCount) el.harvestAllCount.textContent = ready;
     if (el.waterAllBtn) {
@@ -888,6 +922,7 @@
   }
 
   function openVisit(id) {
+    if (farmArea === 'plaza') setFarmArea('garden');
     ensureFriendsDaily();
     if (id && FRIENDS[id]) visitFriendId = id;
     visitOpen = true;
@@ -1263,15 +1298,20 @@
     order.forEach(i => {
       const p = state.plots[i];
       const c = plotCenter(i);
-      const ready = !!(p.crop && p.progress >= 1);
+      const ready = !!(p.unlocked !== false && p.crop && p.progress >= 1);
       let hv = null;
       if (hover && hover.kind === 'plot' && hover.index === i) hv = ready ? 'ready' : 'hover';
       if (ready) ART.drawReadyGlow(ctx, c.x, c.y, t);
       ART.drawPlotGround(ctx, p, i, c.x, c.y, hv, t);
-      if (p.crop) {
+      if (p.unlocked !== false && p.crop) {
         ART.drawPlant(ctx, p, c.x, c.y, t, i);
-        if (ready) ART.drawReadyBadge(ctx, p.crop, c.x, c.y, t);
       }
+    });
+    order.forEach(i => {
+      const c = plotCenter(i);
+      const price = LAND.priceFor(i);
+      const requiredLevel = LAND.levelFor(i);
+      ART.drawPlotStatus(ctx, state.plots[i], i, c.x, c.y, t, { price, requiredLevel, levelMet: state.player.level >= requiredLevel, affordable: state.player.coins >= price });
     });
 
     ART.drawButterflies(ctx, t);
@@ -1289,7 +1329,7 @@
     state.plots.forEach(p => { if (p.crop) p.progress = plotProgress(p); });
     if (visitOpen) drawFriendFrame(ts / 1000);
     else if (farmArea === 'garden') drawWorld(ts / 1000);
-    else drawAreaFrame(ts / 1000);
+    else if (farmArea !== 'plaza') drawAreaFrame(ts / 1000);
     requestAnimationFrame(frame);
   }
 
@@ -1316,15 +1356,15 @@
     const order = Array.from({ length: 12 }, (_, i) => i).sort((a, b) => plotCenter(b).y - plotCenter(a).y);
     for (const i of order) {
       const c = plotCenter(i);
-      const dx = Math.abs(x - c.x) / 96;
-      const dy = Math.abs(y - c.y) / 58;
+      const dx = Math.abs(x - c.x) / (L.field.tw / 2);
+      const dy = Math.abs(y - c.y) / (L.field.th / 2);
       if (dx + dy <= 1) {
         return { kind: 'plot', index: i, x: c.x, y: c.y, plot: state.plots[i] };
       }
     }
     for (const i of order) {
       const p = state.plots[i];
-      if (!p.crop) continue;
+      if (p.unlocked === false || !p.crop) continue;
       const c = plotCenter(i);
       const h = ART.cropHeight(p.crop) * (0.55 + 0.45 * Math.min(1, p.progress || 0));
       if (x > c.x - 50 && x < c.x + 50 && y > c.y - h - 30 && y < c.y + 6) {
@@ -1338,6 +1378,13 @@
     if (!target) return '';
     if (target.kind === 'plot') {
       const p = target.plot;
+      if (p.unlocked === false) {
+        const price = LAND.priceFor(target.index);
+        const requiredLevel = LAND.levelFor(target.index);
+        const shortfall = Math.max(0, price - state.player.coins);
+        const hint = state.player.level < requiredLevel ? `Cần đạt cấp ${requiredLevel} (hiện tại cấp ${state.player.level}).` : shortfall ? `Còn thiếu ${fmt(shortfall)} vàng.` : 'Click để xem và mở ô đất này.';
+        return `<b>Ô đất chưa mở</b><div class="tt-meta">Cấp ${requiredLevel} + ${fmt(price)} vàng.</div><span class="tt-hint">${hint}</span>`;
+      }
       if (!p.crop) {
         if (!p.tilled) {
           return `<b>Ô đất cỏ</b><div class="tt-meta">Một mảnh đất còn hoang, cỏ mọc xanh um.</div><span class="tt-hint">Chọn Cuốc (2) rồi click để khai hoang.</span>`;
@@ -1449,6 +1496,7 @@
     else if (target.kind === 'tree') openOrchard();
     else if (target.kind === 'mailbox') openMail();
     else if (target.kind === 'barn') openBag();
+    updateHUD();
     refreshHover();
   });
 
@@ -1485,9 +1533,65 @@
     save();
   }
 
+  /* ---------------- mở rộng đất ---------------- */
+  function landHTML(index) {
+    const price = LAND.priceFor(index);
+    const requiredLevel = LAND.levelFor(index);
+    const levelMet = state.player.level >= requiredLevel;
+    const coins = state.player.coins;
+    const shortfall = Math.max(0, price - coins);
+    return modalHead('Mở thêm một ô đất', `Ô số ${index + 1} · Sở hữu vĩnh viễn trong ván chơi này`) +
+      `<div class="modal-body">
+        <div class="land-offer">
+          <div class="land-preview" aria-hidden="true"><span>🌱</span></div>
+          <div><small>THÊM CHỖ CHO MÙA VỤ MỚI</small><b>${fmt(price)} <span>vàng</span></b><p>Mở đất rồi dùng Cuốc để tạo luống và gieo hạt.</p></div>
+        </div>
+        <dl class="land-wallet"><div><dt>Cấp độ yêu cầu</dt><dd id="landLevel" class="${levelMet ? '' : 'shortfall'}">Cấp ${requiredLevel} · Bạn: cấp ${state.player.level}</dd></div><div><dt>Vàng hiện có</dt><dd id="landWallet">${fmt(coins)}</dd></div><div><dt>${shortfall ? 'Còn thiếu' : 'Còn lại sau khi mở'}</dt><dd id="landBalance" class="${shortfall ? 'shortfall' : ''}">${fmt(shortfall || coins - price)} vàng</dd></div></dl>
+        <p class="land-note">Mỗi ô chỉ trả vàng một lần. Mở đất không tốn năng lượng.</p>
+        ${!levelMet ? `<p class="land-shortfall" role="status">Cần đạt cấp ${requiredLevel} để mở ô này. Chăm cây và nhận thưởng nhiệm vụ để tăng XP.</p>` : ''}
+        ${shortfall ? '<p class="land-shortfall" role="status">Chưa đủ vàng. Bạn có thể bán nông sản trong Túi đồ để tích lũy thêm.</p>' : ''}
+      </div>
+      <div class="modal-foot land-actions">
+        <button class="btn btn-ghost" data-close>Để sau</button>
+        ${!levelMet ? '<button class="btn btn-ghost" data-open-quests>Nhiệm vụ</button>' : shortfall ? '<button class="btn btn-ghost" data-open-bag>Bán nông sản</button>' : ''}
+        <button id="confirmLandBtn" class="btn btn-gold" data-buy-land="${index}" ${!levelMet || shortfall ? 'disabled' : ''}>${!levelMet ? `Cần đạt cấp ${requiredLevel}` : shortfall ? 'Chưa đủ vàng' : `Mở đất · ${fmt(price)} vàng`}</button>
+      </div>`;
+  }
+
+  function openLand(index) {
+    if (!state.plots[index] || state.plots[index].unlocked !== false || LAND.priceFor(index) === null) return;
+    landPlotIndex = index;
+    openModal('land', landHTML(index), 'land-modal');
+    const confirm = $('#confirmLandBtn');
+    (confirm.disabled ? $('.modal-close', modalPanel) : confirm).focus({ preventScroll: true });
+  }
+
+  function buyLand(index) {
+    if (modalType !== 'land' || index !== landPlotIndex) return;
+    const result = LAND.purchase(state, index);
+    if (!result.ok) {
+      if (result.reason === 'funds' || result.reason === 'level') {
+        toast(result.reason === 'level' ? `Cần đạt cấp ${result.requiredLevel} để mở ô đất này.` : 'Bạn chưa đủ vàng để mở ô đất này.', 'err');
+        refreshModal();
+      } else closeModal(true);
+      return;
+    }
+    const c = plotCenter(index);
+    closeModal(true);
+    selectTool('hoe');
+    addParticles(c.x, c.y - 6, 'spark', '#f0ce80', 14, 40);
+    addFloater(c.x, c.y - 34, 'Đất mới của bạn!', '#fff4c8');
+    toast(`Đã mở ô số ${index + 1} với ${fmt(result.cost)} vàng. Cuốc đất để bắt đầu trồng nhé!`, 'gold', 3200);
+    GameAudio.sfx('pop');
+    updateHUD();
+    save();
+    refreshHover();
+  }
+
   /* ---------------- hành động ruộng ---------------- */
   function actPlot(i) {
     const p = state.plots[i];
+    if (p.unlocked === false) { openLand(i); return; }
     const c = plotCenter(i);
     p.progress = plotProgress(p);
     if (p.crop && p.progress >= 1) {
@@ -1607,7 +1711,7 @@
 
   function harvestPlot(i) {
     const p = state.plots[i];
-    if (!p.crop) return;
+    if (p.unlocked === false || !p.crop) return;
     p.progress = plotProgress(p);
     if (p.progress < 1) return;
     if (!spendEnergy(1)) return;
@@ -1643,7 +1747,7 @@
     for (let i = 0; i < state.plots.length; i++) {
       const p = state.plots[i];
       p.progress = plotProgress(p);
-      if (!p.crop || p.watered || p.progress >= 1) continue;
+      if (p.unlocked === false || !p.crop || p.watered || p.progress >= 1) continue;
       if (!spendEnergy(1)) break;
       const prog = clamp((now() - p.startedAt) / p.growMs, 0, 1);
       p.growMs = Math.max(4000, p.growMs * 0.78);
@@ -1670,7 +1774,7 @@
     const ready = [];
     state.plots.forEach((p, i) => {
       p.progress = plotProgress(p);
-      if (p.crop && p.progress >= 1) ready.push(i);
+      if (p.unlocked !== false && p.crop && p.progress >= 1) ready.push(i);
     });
     if (!ready.length) { toast('Chưa có cây nào chín để thu hoạch.', '', 2200); return; }
     let count = 0;
@@ -1825,6 +1929,7 @@
     modalType = type;
     paintModal(html, cls);
     modalRoot.classList.remove('hidden');
+    if (farmArea === 'plaza') syncPlazaPlayback();
     hideTooltip();
     GameAudio.sfx('open');
   }
@@ -1841,6 +1946,7 @@
     modalRoot.classList.add('hidden');
     modalPanel.innerHTML = '';
     modalType = null;
+    landPlotIndex = null;
     if (panelModal) setRailActive('crops');
     if (!visitOpen) setActiveNav('farm');
     if (!silent) GameAudio.sfx('close');
@@ -1848,6 +1954,7 @@
       pendingStartConfirm = false;
       startScreen.classList.remove('hide');
     }
+    if (farmArea === 'plaza') syncPlazaPlayback();
   }
 
   function refreshModal() {
@@ -1860,6 +1967,7 @@
     else if (modalType === 'help') paintModal(helpHTML(), 'help-modal');
     else if (modalType === 'animals') paintModal(animalsHTML(), 'animals-modal');
     else if (modalType === 'orchard') paintModal(orchardHTML(), 'orchard-modal');
+    else if (modalType === 'land') paintModal(landHTML(landPlotIndex), 'land-modal');
     const body = $('.modal-body', modalPanel);
     if (body) body.scrollTop = scroll;
   }
@@ -2234,7 +2342,7 @@
     return modalHead('Sổ tay nông dân', 'Mọi điều cần biết để khu vườn thêm xanh') +
       `<div class="modal-body">
         <div class="help-grid">
-          <div class="help-step"><span class="hs-ico">⛏️</span><div><b>1. Khai hoang</b>Chọn Cuốc rồi click ô cỏ để tạo luống đất tơi xốp.</div></div>
+          <div class="help-step"><span class="hs-ico">⛏️</span><div><b>1. Mở đất & khai hoang</b>Bắt đầu với 2 ô miễn phí. Ô khóa cần đủ cả cấp độ và vàng. Mỗi cấp từ 2 đến 6 cho phép mua thêm 2 ô; giá 80–800 vàng. Dùng Cuốc để tạo luống sau khi mở.</div></div>
           <div class="help-step"><span class="hs-ico">🌱</span><div><b>2. Gieo & tưới</b>Chọn hạt giống, click ô đất để gieo. Tưới nước giúp cây lớn nhanh hơn.</div></div>
           <div class="help-step"><span class="hs-ico">🧺</span><div><b>3. Thu hoạch</b>Khi cây chín, click để hái. Mở Túi đồ để bán nông sản lấy vàng.</div></div>
           <div class="help-step"><span class="hs-ico">🐄</span><div><b>4. Chăn nuôi</b>Mở trang “Chăn nuôi” ở cột bên trái để cho ăn, thu sữa và trứng.</div></div>
@@ -2271,7 +2379,7 @@
           <div class="help-step"><span class="hs-ico">🏆</span><div><b>Nhận thưởng</b>Mở “Nhiệm vụ” trên thanh menu, hoặc bấm thẻ “Việc đang làm” bên trái.</div></div>
           <div class="help-step"><span class="hs-ico">🧺</span><div><b>Bán nông sản</b>Mở Túi đồ, bán những gì đã thu hoạch để mua thêm hạt giống.</div></div>
         </div>
-        <div class="help-tip">Bạn có thể chơi bằng chuột hoặc chạm. Game tự động lưu trên máy — đóng tab rồi mở lại vẫn tiếp tục được.</div>
+        <div class="help-tip">Bạn bắt đầu với 2 ô đất. Hoàn thành các nhiệm vụ cuốc, gieo, tưới và thu hoạch để lên cấp 2. Đủ cấp và vàng mới mở thêm đất; mỗi cấp từ 2 đến 6 có thêm 2 ô có thể mua.</div>
       </div>
       <div class="modal-foot"><button class="btn btn-primary" data-welcome>Bắt đầu làm nông</button></div>`;
   }
@@ -2568,8 +2676,17 @@
     }, 1000);
   }
 
+  function syncPlazaPlayback() {
+    if (farmArea === 'plaza' && !visitOpen && modalRoot.classList.contains('hidden') && !$('#accountOverlay:not(.hidden)')) {
+      Plaza.enter();
+    } else {
+      Plaza.leave();
+    }
+  }
+
   function setFarmArea(area) {
-    if (!['garden', 'animals', 'fishing', 'orchard'].includes(area)) area = 'garden';
+    if (!['garden', 'animals', 'fishing', 'orchard', 'plaza'].includes(area)) area = 'garden';
+    if (area === 'plaza' && area === farmArea) { syncPlazaPlayback(); return; }
     if (area === farmArea && (area === 'garden' || !areaPage.classList.contains('hidden'))) {
       if (area !== 'garden') renderAreaPage();
       return;
@@ -2577,12 +2694,16 @@
     clearInterval(areaRefreshTimer);
     areaRefreshTimer = null;
     if (farmArea === 'fishing' && area !== 'fishing') clearFishTimers();
+    if (farmArea === 'plaza') Plaza.leave();
     if (area === 'fishing' && farmArea !== 'fishing') {
       clearFishTimers();
       fishPanel.phase = 'idle';
       fishPanel.result = '';
     }
     farmArea = area;
+    plazaPage.classList.toggle('hidden', area !== 'plaza');
+    stage.classList.toggle('plaza-mode', area === 'plaza');
+    applyAudioSettings();
     setRailActive(area === 'garden' ? 'crops' : area);
     setActiveNav('farm');
     hideTooltip();
@@ -2593,8 +2714,15 @@
       save();
       return;
     }
-    areaPage.classList.remove('hidden');
     stage.classList.add('area-mode');
+    if (area === 'plaza') {
+      areaPage.classList.add('hidden');
+      syncPlazaPlayback();
+      updateHUD();
+      save();
+      return;
+    }
+    areaPage.classList.remove('hidden');
     renderAreaPage();
     updateHUD();
     if (area === 'animals' || area === 'orchard') startAreaRefresh();
@@ -2942,7 +3070,7 @@
   function applyAudioSettings() {
     if (!GameAudio.ready) return;
     GameAudio.setSound(state.settings.sound);
-    GameAudio.setMusic(state.settings.sound && state.settings.music);
+    GameAudio.setMusic(farmArea !== 'plaza' && state.settings.sound && state.settings.music);
     updateSoundIcon();
   }
   function toggleSound() {
@@ -2996,7 +3124,8 @@
   }
 
   function resetGame() {
-    state = fresh(true);
+    if (farmArea === 'plaza') setFarmArea('garden');
+    state = fresh();
     state.flags.started = true;
     state.flags.welcomeSeen = false;
     saveEnabled = true;
@@ -3050,11 +3179,16 @@
     $('#navFriends').addEventListener('click', () => openVisit(visitFriendId));
     $('#navQuests').addEventListener('click', openQuests);
     $('#shopBtn').addEventListener('click', () => openShop('seeds'));
+    $('#seedShopBtn').addEventListener('click', () => openShop('seeds'));
     $('#bagBtn').addEventListener('click', openBag);
     $('#mailBtn').addEventListener('click', openMail);
     $('#helpBtn').addEventListener('click', openHelp);
     el.soundBtn.addEventListener('click', toggleSound);
     $('#farmTaskChip').addEventListener('click', openQuests);
+    $('#expandLandBtn').addEventListener('click', () => {
+      const index = LAND.nextLocked(state.plots);
+      if (index >= 0) openLand(index);
+    });
 
     $$('.rail-btn[data-area]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -3067,11 +3201,16 @@
         if (area === 'animals') openAnimals();
         else if (area === 'fishing') openFishing();
         else if (area === 'orchard') openOrchard();
+        else if (area === 'plaza') setFarmArea('plaza');
       });
     });
 
     el.waterAllBtn.addEventListener('click', waterAllPlots);
     el.harvestAllBtn.addEventListener('click', harvestAllPlots);
+    $('#plazaBack').addEventListener('click', () => setFarmArea('garden'));
+    document.addEventListener('account-visibility', () => { if (farmArea === 'plaza') syncPlazaPlayback(); });
+    window.addEventListener('pagehide', () => { if (farmArea === 'plaza') Plaza.leave(); });
+    window.addEventListener('pageshow', event => { if (event.persisted && farmArea === 'plaza') syncPlazaPlayback(); });
 
     areaPage.addEventListener('click', e => {
       if (e.target.closest('[data-area-back]')) { setFarmArea('garden'); return; }
@@ -3175,6 +3314,8 @@
         return;
       }
       let t;
+      if ((t = e.target.closest('[data-buy-land]'))) { buyLand(Number(t.dataset.buyLand)); return; }
+      if (e.target.closest('[data-open-quests]')) { openQuests(); return; }
       if ((t = e.target.closest('[data-tab]'))) {
         shopTab = t.dataset.tab;
         GameAudio.sfx('click');
@@ -3228,6 +3369,8 @@
 
     document.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if ($('#accountOverlay:not(.hidden)')) return;
+      if (e.target.closest?.('input, textarea, [contenteditable="true"]') && e.key !== 'Escape') return;
       if (!startScreen.classList.contains('hide')) {
         if (e.key === 'Enter') {
           const btn = !$('#btnContinue').classList.contains('hidden') ? $('#btnContinue') : $('#btnStart');
@@ -3336,7 +3479,7 @@
   function resetToFresh() {
     suppressServerSave = true;
     try {
-      state = fresh(true);
+      state = fresh();
       currentTool = state.ui.tool;
       selectedSeed = state.ui.seed;
       saveEnabled = true;

@@ -35,12 +35,11 @@
   function drawAnimals(ctx, t, data) {
     const rnd = U.makeRand(320);
     drawBaseSky(ctx, t, {
-      sky1: '#c9efff', sky2: '#eaf9e3', hill1: '#a9dd7b', hill2: '#7bc455',
-      grass1: '#a1df6c', grass2: '#63b23e'
+      sky1: '#b5d5da', sky2: '#edf1d9'
     });
-    drawHills(ctx, rnd, '#a8dc7d', '#76bf50');
+    drawHills(ctx, rnd, '#c5d2a5', '#9eb18a');
     // bãi cỏ
-    ctx.fillStyle = createGrass(ctx, '#9bda68', '#63b23e');
+    ctx.fillStyle = createGrass(ctx, '#b4c785', '#789b62');
     ctx.beginPath();
     ctx.moveTo(-20, 255);
     ctx.bezierCurveTo(180, 238, 360, 268, 520, 250);
@@ -48,6 +47,7 @@
     ctx.bezierCurveTo(1130, 234, 1220, 258, 1300, 242);
     ctx.lineTo(1300, H); ctx.lineTo(-20, H); ctx.closePath();
     ctx.fill();
+    drawMeadow(ctx, 320);
 
     // đường mòn nhỏ
     ctx.save();
@@ -133,9 +133,9 @@
     U.ellipse(ctx, x, base + 16, 185, 34, 'rgba(50,75,20,.25)');
     // thân
     const wall = ctx.createLinearGradient(x - 150, 0, x + 150, 0);
-    wall.addColorStop(0, '#a66b37');
-    wall.addColorStop(0.45, '#d19a5a');
-    wall.addColorStop(1, '#8f572a');
+    wall.addColorStop(0, '#cfaa78');
+    wall.addColorStop(0.45, '#b98b59');
+    wall.addColorStop(1, '#8a6542');
     U.rr(ctx, x - 152, base - 190, 304, 196, 7);
     ctx.fillStyle = wall; ctx.fill();
     ctx.strokeStyle = '#713f1d'; ctx.lineWidth = 3; ctx.stroke();
@@ -167,8 +167,9 @@
     ctx.lineTo(x - 162, base - 172);
     ctx.closePath();
     const roof = ctx.createLinearGradient(0, base - 322, 0, base - 170);
-    roof.addColorStop(0, '#e07355');
-    roof.addColorStop(1, '#a83d2f');
+    roof.addColorStop(0, '#d99072');
+    roof.addColorStop(0.45, '#ba6953');
+    roof.addColorStop(1, '#8a5145');
     ctx.fillStyle = roof; ctx.fill();
     ctx.strokeStyle = '#6d2e22'; ctx.lineWidth = 3; ctx.stroke();
     // ngói
@@ -178,6 +179,9 @@
       ctx.beginPath(); ctx.moveTo(x - 170 + i * 43, base - 170); ctx.lineTo(x - 95 + i * 43, base - 320); ctx.stroke();
     }
     ctx.restore();
+    // Warm eaves and a soft cast shadow give the facade depth.
+    U.fillRR(ctx, x - 150, base - 170, 300, 9, 2, 'rgba(70,48,30,.20)');
+    U.fillRR(ctx, x - 160, base - 178, 320, 5, 2, '#e7bd91');
     // cửa sổ
     [-90, 70].forEach((wx, i) => {
       U.fillRR(ctx, x + wx, base - 150, 34, 38, 3, '#f7e7c1');
@@ -309,7 +313,7 @@
   function drawSimpleTree(ctx, x, y, s) {
     ctx.save();
     ctx.translate(x, y); ctx.scale(s, s);
-    U.ellipse(ctx, 0, 6, 40, 12, 'rgba(50,80,25,.22)');
+    U.ellipse(ctx, 12, 7, 54, 13, 'rgba(48,70,43,.16)');
     ctx.fillStyle = '#82532b';
     U.fillRR(ctx, -8, -92, 16, 100, 6, '#82532b');
     ctx.strokeStyle = '#5f3a1c'; ctx.lineWidth = 2;
@@ -319,10 +323,7 @@
       [-4, -118, 44, 32], [26, -104, 28, 24]
     ];
     blobs.forEach(([bx, by, rx, ry], i) => {
-      U.ellipse(ctx, bx, by, rx, ry, i % 2 ? '#4f9c37' : '#62b143');
-      ctx.globalAlpha = 0.25;
-      U.ellipse(ctx, bx - rx * 0.2, by - ry * 0.3, rx * 0.55, ry * 0.42, '#bce78f');
-      ctx.globalAlpha = 1;
+      drawCanopy(ctx, bx, by, rx, ry, i);
     });
     ctx.restore();
   }
@@ -333,12 +334,11 @@
   function drawFishing(ctx, t, data) {
     const rnd = U.makeRand(808);
     drawBaseSky(ctx, t, {
-      sky1: '#b9edff', sky2: '#e6fbe9', hill1: '#a6dc90', hill2: '#74c47d',
-      grass1: '#9bd27d', grass2: '#5aae58'
+      sky1: '#b1d6de', sky2: '#e6eedb'
     });
-    drawHills(ctx, rnd, '#a6db8e', '#73bf79');
+    drawHills(ctx, rnd, '#b9ceac', '#8eaf91');
     // nền cỏ
-    ctx.fillStyle = createGrass(ctx, '#9dd77a', '#58a957');
+    ctx.fillStyle = createGrass(ctx, '#abc38c', '#729c78');
     ctx.beginPath();
     ctx.moveTo(-20, 255);
     ctx.bezierCurveTo(180, 235, 340, 268, 520, 250);
@@ -346,19 +346,20 @@
     ctx.bezierCurveTo(1130, 238, 1220, 258, 1300, 244);
     ctx.lineTo(1300, H); ctx.lineTo(-20, H); ctx.closePath();
     ctx.fill();
+    drawMeadow(ctx, 808);
 
     // hồ lớn
     const p = { x: 690, y: 465, rx: 470, ry: 192 };
     U.blobPath(ctx, p.x, p.y, p.rx + 34, p.ry + 27, [1, .93, 1.04, .95, 1.02, .92, 1.05, .94, 1.01, .96], -0.12);
-    ctx.fillStyle = '#d8c793'; ctx.fill();
+    ctx.fillStyle = '#c5b68e'; ctx.fill();
     ctx.strokeStyle = 'rgba(115,90,45,.4)'; ctx.lineWidth = 3; ctx.stroke();
     U.blobPath(ctx, p.x, p.y, p.rx + 20, p.ry + 16, [1, .93, 1.04, .95, 1.02, .92, 1.05, .94, 1.01, .96], -0.12);
-    ctx.fillStyle = '#b9ebb9'; ctx.fill();
+    ctx.fillStyle = '#d8dfb6'; ctx.fill();
     U.blobPath(ctx, p.x, p.y, p.rx, p.ry, [1, .93, 1.04, .95, 1.02, .92, 1.05, .94, 1.01, .96], -0.12);
     const wg = ctx.createLinearGradient(0, p.y - p.ry, 0, p.y + p.ry);
-    wg.addColorStop(0, '#8de9e1');
-    wg.addColorStop(0.5, '#45c6ce');
-    wg.addColorStop(1, '#1c8fa6');
+    wg.addColorStop(0, '#b7dbcf');
+    wg.addColorStop(0.42, '#73b4b2');
+    wg.addColorStop(1, '#447f8b');
     ctx.fillStyle = wg; ctx.fill();
     ctx.strokeStyle = 'rgba(12,90,105,.35)'; ctx.lineWidth = 3; ctx.stroke();
 
@@ -366,6 +367,13 @@
     ctx.save();
     U.blobPath(ctx, p.x, p.y, p.rx, p.ry, [1, .93, 1.04, .95, 1.02, .92, 1.05, .94, 1.01, .96], -0.12);
     ctx.clip();
+    // Reflected sky and shaded shallows stay inside the water's contour.
+    const reflection = ctx.createLinearGradient(0, 290, 0, 440);
+    reflection.addColorStop(0, 'rgba(251,247,214,.38)');
+    reflection.addColorStop(1, 'rgba(251,247,214,0)');
+    ctx.fillStyle = reflection; ctx.fillRect(200, 270, 1000, 190);
+    ctx.strokeStyle = 'rgba(43,90,83,.17)'; ctx.lineWidth = 18;
+    ctx.beginPath(); ctx.ellipse(p.x + 5, p.y + 2, p.rx - 8, p.ry - 8, 0, 0, TAU); ctx.stroke();
     for (let i = 0; i < 16; i++) {
       const x = 300 + rnd() * 780;
       const y = 315 + rnd() * 260;
@@ -471,7 +479,7 @@
     // phao
     if (phase) {
       const dip = phase === 'bite' ? 8 + Math.sin(t * 16) * 2 : Math.sin(t * 2) * 3;
-      const bx = x + bobX, by = y + bobY + dip;
+      const bx = bobX, by = bobY + dip;
       ctx.beginPath(); ctx.ellipse(bx, by, 6, 9, 0, 0, TAU);
       ctx.fillStyle = '#fffdf0'; ctx.fill();
       ctx.strokeStyle = '#a6382a'; ctx.lineWidth = 1.3; ctx.stroke();
@@ -578,11 +586,10 @@
   function drawOrchard(ctx, t, data) {
     const rnd = U.makeRand(111);
     drawBaseSky(ctx, t, {
-      sky1: '#ffe0b4', sky2: '#e9f7d2', hill1: '#b5dd7c', hill2: '#82c25a',
-      grass1: '#a6dd74', grass2: '#6aba45'
+      sky1: '#e7d5b3', sky2: '#f1efd5'
     });
-    drawHills(ctx, rnd, '#b6da83', '#84be5f');
-    ctx.fillStyle = createGrass(ctx, '#a4dc73', '#66b842');
+    drawHills(ctx, rnd, '#c4cda1', '#a6b98a');
+    ctx.fillStyle = createGrass(ctx, '#bdcb8b', '#879e61');
     ctx.beginPath();
     ctx.moveTo(-20, 250);
     ctx.bezierCurveTo(180, 234, 340, 266, 520, 250);
@@ -590,6 +597,7 @@
     ctx.bezierCurveTo(1130, 234, 1220, 258, 1300, 242);
     ctx.lineTo(1300, H); ctx.lineTo(-20, H); ctx.closePath();
     ctx.fill();
+    drawMeadow(ctx, 111);
 
     // đường mòn
     const path = new Path2D();
@@ -633,7 +641,7 @@
     ctx.save();
     ctx.translate(x + shake, y);
     ctx.scale(s, s);
-    U.ellipse(ctx, 0, 8, 104, 30, 'rgba(50,80,25,.24)');
+    U.ellipse(ctx, 18, 11, 114, 28, 'rgba(48,68,37,.18)');
     // thân
     const tg = ctx.createLinearGradient(-20, 0, 24, 0);
     tg.addColorStop(0, '#7a4a24'); tg.addColorStop(0.45, '#b37b3e'); tg.addColorStop(1, '#6b3d1b');
@@ -657,11 +665,8 @@
       [92, -212, 58, 48, '#4a9131'], [-40, -180, 66, 50, '#67b348'],
       [50, -174, 54, 44, '#5aa33b'], [132, -238, 36, 30, '#4c9434']
     ];
-    blobs.forEach(([bx, by, rx, ry, col]) => {
-      U.ellipse(ctx, bx, by, rx, ry, col);
-      ctx.globalAlpha = 0.25;
-      U.ellipse(ctx, bx - rx * 0.22, by - ry * 0.3, rx * 0.55, ry * 0.45, '#c7f095');
-      ctx.globalAlpha = 1;
+    blobs.forEach(([bx, by, rx, ry], i) => {
+      drawCanopy(ctx, bx, by, rx, ry, i);
     });
     // quả
     const rnd = U.makeRand(55);
@@ -670,7 +675,9 @@
       const ay = -260 + rnd() * 120;
       if (ready) {
         ctx.beginPath(); ctx.arc(ax, ay, 7.5, 0, TAU);
-        ctx.fillStyle = '#e8483a'; ctx.fill();
+        const apple = ctx.createRadialGradient(ax - 3, ay - 3, 1, ax, ay, 9);
+        apple.addColorStop(0, '#f28f68'); apple.addColorStop(1, '#b94136');
+        ctx.fillStyle = apple; ctx.fill();
         ctx.strokeStyle = '#a52220'; ctx.lineWidth = 1; ctx.stroke();
         ctx.fillStyle = 'rgba(255,255,255,.6)';
         ctx.beginPath(); ctx.arc(ax - 2, ay - 2, 1.8, 0, TAU); ctx.fill();
@@ -752,6 +759,14 @@
   }
 
   function drawHills(ctx, rnd, c1, c2) {
+    // Pale ridges recede behind the more detailed near tree line.
+    ctx.beginPath();
+    ctx.moveTo(-30, 221);
+    ctx.bezierCurveTo(180, 130, 270, 179, 410, 145);
+    ctx.bezierCurveTo(610, 109, 730, 187, 920, 145);
+    ctx.bezierCurveTo(1080, 112, 1190, 177, 1310, 150);
+    ctx.lineTo(1310, 300); ctx.lineTo(-30, 300); ctx.closePath();
+    ctx.fillStyle = '#d3dcc0'; ctx.fill();
     ctx.beginPath();
     ctx.moveTo(-30, 262);
     ctx.bezierCurveTo(140, 170, 310, 222, 470, 188);
@@ -764,9 +779,9 @@
     for (let i = 0; i < 24; i++) {
       const x = 40 + i * 54 + rnd() * 22, y = 236 + Math.sin(i) * 9;
       const s = 16 + rnd() * 18;
-      ctx.globalAlpha = .45;
-      U.ellipse(ctx, x, y - s * .5, s * .7, s * .55, '#4e8f43');
-      U.ellipse(ctx, x + s * .4, y - s * .8, s * .5, s * .4, '#63a64e');
+      ctx.globalAlpha = .32;
+      U.ellipse(ctx, x, y - s * .5, s * .7, s * .55, '#587d5c');
+      U.ellipse(ctx, x + s * .4, y - s * .8, s * .5, s * .4, '#79955d');
       ctx.globalAlpha = 1;
     }
   }
@@ -775,6 +790,48 @@
     const g = ctx.createLinearGradient(0, 230, 0, H);
     g.addColorStop(0, c1); g.addColorStop(1, c2);
     return g;
+  }
+
+  // Deterministic texture is painted once; animation frames reuse the bitmap.
+  const meadowLayers = new Map();
+  function drawMeadow(ctx, seed) {
+    if (!meadowLayers.has(seed)) {
+      const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+      const c = cv.getContext('2d');
+      const rnd = U.makeRand(seed + 73);
+      const light = c.createRadialGradient(770, 325, 20, 770, 325, 570);
+      light.addColorStop(0, 'rgba(255,243,190,.18)');
+      light.addColorStop(1, 'rgba(255,243,190,0)');
+      c.fillStyle = light; c.fillRect(0, 270, W, H - 270);
+      for (let i = 0; i < 100; i++) {
+        const x = rnd() * W, y = 280 + rnd() * 440;
+        c.globalAlpha = .16 + rnd() * .16;
+        U.drawGrassTuft(c, x, y, 1 + rnd() * 2, i % 2 ? '#526e42' : '#eef1c0');
+      }
+      for (let i = 0; i < 22; i++) {
+        c.globalAlpha = .7;
+        U.drawFlower(c, 20 + rnd() * 1240, 320 + rnd() * 380, .8 + rnd() * .65, i % 3 ? '#fff5dc' : '#e6bc86');
+      }
+      meadowLayers.set(seed, cv);
+    }
+    ctx.drawImage(meadowLayers.get(seed), 0, 0);
+  }
+
+  function drawCanopy(ctx, x, y, rx, ry, variant) {
+    const leaf = ctx.createRadialGradient(x - rx * .4, y - ry * .55, 2, x, y, rx * 1.15);
+    leaf.addColorStop(0, variant % 2 ? '#a8bf75' : '#b5c980');
+    leaf.addColorStop(.5, variant % 2 ? '#789450' : '#839e59');
+    leaf.addColorStop(1, '#486b48');
+    U.ellipse(ctx, x, y, rx, ry, leaf);
+    // Short leaf-shaped highlights break up the round silhouette.
+    ctx.save();
+    ctx.globalAlpha = .28;
+    for (let i = 0; i < 5; i++) {
+      const a = i * 2.4 + variant;
+      U.ellipse(ctx, x + Math.cos(a) * rx * .55, y + Math.sin(a) * ry * .55,
+        rx * .12, ry * .065, '#eef1b8', -.4);
+    }
+    ctx.restore();
   }
 
   function drawButterflies(ctx, t) {
@@ -795,7 +852,7 @@
   function drawVignette(ctx) {
     const vg = ctx.createRadialGradient(640, 350, 280, 640, 350, 760);
     vg.addColorStop(0, 'rgba(255,245,190,0)');
-    vg.addColorStop(1, 'rgba(55,55,20,.12)');
+    vg.addColorStop(1, 'rgba(47,68,48,.10)');
     ctx.fillStyle = vg;
     ctx.fillRect(0, 0, W, H);
   }

@@ -5,6 +5,7 @@ import crypto from 'node:crypto';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
+import { createPlaza } from './server/plaza.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT || 8123);
@@ -15,6 +16,9 @@ const ADMIN_CRED_PATH = path.join(DATA_DIR, 'admin-credentials.txt');
 const SESSION_COOKIE = 'nt_sid';
 const SESSION_DAYS = 30;
 const MAX_BODY = 256 * 1024;
+const plaza = createPlaza();
+const plazaCookie = 'nt_plaza_guest';
+const plazaGuestSecret = crypto.randomBytes(32);
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
@@ -406,6 +410,51 @@ function capacityEstimate(dau, concurrencyPct, reqPerUserPerMin) {
   return { dau, concurrencyPct, peakConcurrent: peak, reqPerMin: Math.round(peak * reqPerUserPerMin), reqPerSec: rps, appVcpu, appRamGb, postgresVcpu, postgresRamGb, redisRamGb, storageGb, bandwidthGbPerDay };
 }
 
+/* ---------------- Quảng trường ---------------- */
+function signPlazaGuest(nonce) {
+  return crypto.createHmac('sha256', plazaGuestSecret).update(nonce).digest('base64url');
+}
+
+function plazaVisitor(req, res, allowNewGuest) {
+  const user = authUser(req, res);
+  if (user) return { key: `user:${user.id}`, name: user.displayName || user.username };
+  const cookie = parseCookies(req)[plazaCookie] || '';
+  const match = /^([\w-]{24})\.([\w-]{43})$/.exec(cookie);
+  if (match && crypto.timingSafeEqual(Buffer.from(match[2]), Buffer.from(signPlazaGuest(match[1])))) {
+    return { key: `guest:${match[1]}`, name: 'Khách' };
+  }
+  if (!allowNewGuest) throw Object.assign(new Error('Hãy vào quảng trường trước khi thao tác.'), { status: 403 });
+  if (!rateLimit(`${clientIp(req)}:plaza-guests`, 40, 60_000)) {
+    throw Object.assign(new Error('Vui lòng chờ một lúc rồi vào lại quảng trường.'), { status: 429 });
+  }
+  const nonce = randomToken(18);
+  res.setHeader('Set-Cookie', `${plazaCookie}=${nonce}.${signPlazaGuest(nonce)}; HttpOnly; SameSite=Lax; Path=/api/plaza; Max-Age=604800`);
+  return { key: `guest:${nonce}`, name: 'Khách' };
+}
+
+async function handlePlaza(req, res, pathname) {
+  const action = pathname.slice('/api/plaza'.length);
+  if (!['', '/queue', '/skip', '/ended', '/leave'].includes(action)) {
+    return apiError(res, 404, 'Không tìm thấy thao tác quảng trường.');
+  }
+  if (req.method !== (action ? 'POST' : 'GET')) return apiError(res, 405, 'Phương thức không hợp lệ.');
+  const viewer = plazaVisitor(req, res, !action);
+  if (!action) {
+    if (!rateLimit(`${viewer.key}:plaza-read`, 120, 60_000)) return apiError(res, 429, 'Bạn đang tải quảng trường quá nhanh.');
+    return json(res, 200, plaza.poll(viewer.key));
+  }
+  if (!rateLimit(`${clientIp(req)}:plaza-write`, 180, 60_000) ||
+      !rateLimit(`${viewer.key}:plaza${action}`, action === '/queue' ? 8 : 30, 60_000)) {
+    return apiError(res, 429, 'Bạn thao tác quá nhanh. Hãy thử lại sau một lúc.');
+  }
+  const body = await readJson(req, 4 * 1024);
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return apiError(res, 400, 'Dữ liệu không hợp lệ.');
+  if (action === '/queue') return json(res, 200, plaza.enqueue(viewer.key, viewer.name, body));
+  if (action === '/skip') return json(res, 200, plaza.skip(viewer.key, body));
+  if (action === '/ended') return json(res, 200, plaza.ended(viewer.key, body));
+  return json(res, 200, plaza.leave(viewer.key));
+}
+
 /* ---------------- API ---------------- */
 async function handleApi(req, res, pathname, url) {
   const method = req.method;
@@ -417,6 +466,8 @@ async function handleApi(req, res, pathname, url) {
 
   if (!['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) { apiError(res, 405, 'Method không hỗ trợ.'); return; }
   if (method !== 'GET' && !sameOrigin(req)) { apiError(res, 403, 'Origin không hợp lệ.'); return; }
+
+  if (pathname === '/api/plaza' || pathname.startsWith('/api/plaza/')) return handlePlaza(req, res, pathname);
 
   /* auth */
   if (pathname === '/api/auth/register' && method === 'POST') {
@@ -841,7 +892,7 @@ function serveStatic(req, res, pathname) {
   const headers = {
     'Content-Type': MIME[ext] || 'application/octet-stream',
     'X-Content-Type-Options': 'nosniff',
-    'Referrer-Policy': 'same-origin',
+    'Referrer-Policy': rel === '/index.html' ? 'strict-origin-when-cross-origin' : 'same-origin',
     'X-Frame-Options': 'SAMEORIGIN',
     'Cache-Control': isHtml ? 'no-store' : 'no-cache'
   };

@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <meta name="theme-color" content="#3e8a2c" />
+  <meta name="theme-color" content="#345b46" />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <title>Nông Trại Vui Vẻ — Tuổi thơ trở lại</title>
   <link rel="stylesheet" href="assets/style.css" />
   <link rel="stylesheet" href="assets/account.css" />
+  <link rel="stylesheet" href="assets/theme.css" />
+  <link rel="stylesheet" href="assets/plaza.css" />
 </head>
 <body>
   <div id="app">
@@ -161,8 +163,13 @@
           </div>
         </header>
 
+        <div class="garden-caption" aria-hidden="true">
+          <span>CHĂM TỪNG MẦM XANH</span>
+          <b>Mùa vui trong vườn</b>
+        </div>
+
         <aside class="farm-rail" aria-label="Khu vực nông trại">
-          <span class="rail-heading">Khu vườn</span>
+          <span class="rail-heading">Khám phá nông trại</span>
           <button class="rail-btn active" data-area="crops" title="Trồng trọt">
             <span class="rail-ic">
               <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 40V23" stroke="#4c8f31" stroke-width="4" stroke-linecap="round"/><path d="M24 29C13 29 7 21 7 11c11 0 20 8 20 18z" fill="#9ce05e"/><path d="M24 25c9 0 15-7 15-15-10 0-16 6-16 15z" fill="#6ec43d"/></svg>
@@ -189,28 +196,47 @@
             <span>Vườn cây</span>
             <b id="orchardReadyDot" class="rail-dot hidden"></b>
           </button>
+          <button class="rail-btn" data-area="plaza" title="Quảng trường · Xem YouTube cùng nhau" aria-label="Quảng trường">
+            <span class="rail-ic"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 37h24m-18-6-2 6m14-6 2 6" fill="none" stroke="#716344" stroke-width="2.8" stroke-linecap="round"/><rect x="5" y="9" width="38" height="23" rx="4" fill="#849d86" stroke="#436757" stroke-width="2.4"/><path d="m21 15 9 5-9 5z" fill="#fff0ba"/></svg></span>
+            <span>Quảng trường</span>
+          </button>
           <button id="farmTaskChip" class="farm-task" title="Mở lịch canh tác">
-            <span class="farm-task-label">Việc đang làm</span>
-            <span id="farmTaskText" class="farm-task-text">Cuốc 3 ô đất</span>
+            <span class="farm-task-label">Hôm nay làm gì?</span>
+            <span id="farmTaskText" class="farm-task-text">Cuốc 2 ô đất</span>
             <span class="farm-task-progress"><i id="farmTaskFill"></i></span>
-            <span id="farmTaskCount" class="farm-task-count">0/3</span>
+            <span id="farmTaskCount" class="farm-task-count">0/2</span>
           </button>
         </aside>
 
-        <div class="hud-bottom">
-          <div class="farm-controls">
+        <aside class="planting-sidebar" aria-label="Thông tin trồng trọt">
+          <section class="garden-summary" aria-label="Tình trạng khu vườn">
+            <div class="summary-heading"><span>VƯỜN HÔM NAY</span><b id="gardenPlanted">0 / 12 ô</b></div>
+            <div class="garden-stats">
+              <div class="stat-ready"><b id="gardenReady">0</b><span>Đã chín</span></div>
+              <div class="stat-thirsty"><b id="gardenThirsty">0</b><span>Cần tưới</span></div>
+              <div><b id="gardenEmpty">0</b><span>Chờ gieo</span></div>
+            </div>
+            <button id="expandLandBtn" class="expand-land-btn" title="Mở thêm đất khi đủ cấp độ và vàng">
+              <span id="gardenOwned">Đã mở 2 / 12 ô</span><b id="expandLandLabel">Mở đất ＋</b>
+            </button>
+          </section>
+          <section class="seed-guide" aria-label="Thông tin giống đang chọn">
+            <span class="guide-heading">GIỐNG ĐANG CHỌN</span>
             <div class="seed-info" id="seedInfo">
               <canvas id="seedInfoIcon" width="128" height="128" class="item-icon" aria-hidden="true"></canvas>
               <div class="seed-info-copy">
                 <b id="seedInfoName">Cà rốt</b>
-                <span id="seedInfoMeta">30 giây • 30 vàng/quả</span>
+                <span id="seedInfoMeta">Ngọt giòn, dễ trồng, lớn nhanh.</span>
                 <small id="seedInfoCount">Còn 4 hạt</small>
               </div>
             </div>
-            <div class="seed-strip">
-              <span class="seed-strip-label">Hạt giống</span>
-              <div id="seedBar" class="seed-list"></div>
+            <div class="seed-facts">
+              <div><span>Thời gian lớn</span><b id="seedGrowTime">30 giây</b></div>
+              <div><span>Mỗi lần thu</span><b id="seedYield">2 nông sản</b></div>
+              <div><span>Giá bán / đơn vị</span><b id="seedSellPrice">30 vàng</b></div>
+              <div><span>Kinh nghiệm</span><b id="seedXp">+5 XP</b></div>
             </div>
+          </section>
             <div class="quick-actions">
               <button id="waterAllBtn" class="quick-btn" title="Tưới tất cả cây đang khát">
                 <span class="quick-ic">
@@ -226,6 +252,15 @@
                 <span>Thu hoạch</span>
                 <b id="harvestAllCount">0</b>
               </button>
+            </div>
+        </aside>
+
+        <div class="hud-bottom">
+          <div class="farm-controls">
+            <div class="seed-strip">
+              <div class="seed-tray-heading"><b>Hạt giống</b><small>Chọn để gieo</small></div>
+              <div id="seedBar" class="seed-list" aria-label="Chọn hạt giống"></div>
+              <button id="seedShopBtn" class="seed-shop-btn" title="Mua thêm hạt giống">Mua hạt <span aria-hidden="true">＋</span></button>
             </div>
           </div>
           <div class="dock-wrap">
@@ -305,6 +340,10 @@
                 <span class="key">6</span>
               </button>
             </div>
+            <div class="tool-context" role="status">
+              <b id="toolHintName">Cuốc đất</b>
+              <span id="toolHintText">Chạm một ô cỏ để tạo luống mới.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -322,6 +361,46 @@
         </div>
         <div id="areaDock" class="area-dock"></div>
       </div>
+
+      <section id="plazaPage" class="plaza-page hidden" aria-labelledby="plazaTitle">
+        <div class="plaza-layout">
+          <header class="plaza-heading">
+            <div><h1 id="plazaTitle">Quảng trường</h1><p>Rạp chiếu ngoài trời của làng</p></div>
+            <span class="plaza-presence"><i aria-hidden="true"></i><span id="plazaOnline">0</span> người đang xem</span>
+            <button id="plazaBack" class="plaza-back">← Về vườn</button>
+          </header>
+          <div class="plaza-columns">
+            <section class="plaza-theatre" aria-label="Màn chiếu chung">
+              <div class="plaza-screen">
+                <div id="plazaPlayerMount"></div>
+                <div id="plazaPlaceholder" class="plaza-poster">
+                  <svg viewBox="0 0 54 54" aria-hidden="true"><circle cx="27" cy="27" r="25" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m23 18 15 9-15 9z" fill="currentColor"/></svg>
+                  <span>Màn chiếu đang chờ video</span>
+                </div>
+              </div>
+              <div class="plaza-caption">
+                <h2 id="plazaNowTitle">Chưa có video đang chiếu</h2><p id="plazaNowBy"></p>
+                <div class="plaza-play-actions">
+                  <button id="plazaLive" disabled title="Trở về vị trí đang chiếu của phòng">Xem cùng phòng</button>
+                  <button id="plazaSkip" disabled>Bình chọn bỏ qua</button>
+                  <button id="plazaRetry" class="hidden" hidden>Thử lại</button>
+                  <a id="plazaWatchLink" class="hidden" hidden target="_blank" rel="noopener noreferrer">Xem trên YouTube ↗</a>
+                </div>
+                <p id="plazaStatus" role="status" aria-live="polite"></p>
+              </div>
+            </section>
+            <aside class="plaza-program" aria-label="Chương trình chiếu">
+              <form id="plazaForm" autocomplete="off">
+                <label for="plazaInput">Chiếu video YouTube</label>
+                <input id="plazaInput" type="text" inputmode="url" placeholder="Dán liên kết hoặc mã video" maxlength="2048" required spellcheck="false" />
+                <button id="plazaAdd" type="submit">Thêm vào buổi chiếu</button>
+              </form>
+              <div class="plaza-queue-head"><h2>Hàng chờ</h2><span id="plazaQueueCount">0</span></div>
+              <ol id="plazaQueue"><li class="plaza-queue-empty">Chưa có video trong hàng chờ.</li></ol>
+            </aside>
+          </div>
+        </div>
+      </section>
 
       <div id="visitScreen" class="visit-screen hidden" aria-label="Đến thăm vườn bạn">
         <canvas id="friendCanvas" width="1920" height="1080"></canvas>
@@ -372,6 +451,10 @@
 
       <!-- ============ START ============ -->
       <div id="startScreen" class="start-screen">
+        <div class="start-postcard" aria-hidden="true">
+          <span class="postcard-sun">☀</span>
+          <span>Một ngày đẹp trời<small>ở nông trại của bạn</small></span>
+        </div>
         <div class="start-deco start-deco-left" aria-hidden="true">
           <svg viewBox="0 0 220 300">
             <path d="M20 300C30 210 55 160 120 120" stroke="#4c8f31" stroke-width="7" fill="none" stroke-linecap="round"/>
@@ -400,12 +483,12 @@
               <path d="M60 30c17 0 28-10 28-24-17 0-28 10-28 24z" fill="#6cc73e"/>
             </svg>
           </div>
-          <p class="start-eyebrow">Trò chơi nông trại tuổi thơ</p>
+          <p class="start-eyebrow">GÓC NHỎ CỦA NHỮNG NIỀM VUI</p>
           <h1 class="game-logo">
-            <span class="logo-small">NÔNG TRẠI</span>
-            <span class="logo-big">VUI VẺ</span>
+            <span class="logo-small">Nông trại</span>
+            <span class="logo-big">Vui Vẻ</span>
           </h1>
-          <p class="start-tagline">Trở về miền ký ức, vun trồng một góc trời thơm mùi rơm rạ.</p>
+          <p class="start-tagline">Gieo một hạt mầm, gặt một ngày vui.<br>Về chăm khu vườn nhỏ, để bình yên lớn lên.</p>
           <div class="start-actions">
             <button id="btnStart" class="btn btn-primary btn-start">Bắt đầu làm nông</button>
             <button id="btnContinue" class="btn btn-primary hidden">Tiếp tục nông trại</button>
@@ -422,7 +505,7 @@
         </div>
         <div class="start-footer">
           <span>🌾</span>
-          <span>Dành tặng những ngày thơ bé</span>
+          <span>Chậm một chút. Vui nhiều hơn.</span>
           <span>🌾</span>
         </div>
       </div>
@@ -453,6 +536,8 @@
   <script src="assets/friend.js" defer></script>
   <script src="assets/areas.js" defer></script>
   <script src="assets/audio.js" defer></script>
+  <script src="assets/land.js" defer></script>
+  <script src="assets/plaza.js" defer></script>
   <script src="assets/game.js" defer></script>
   <script src="assets/account.js" defer></script>
 </body>

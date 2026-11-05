@@ -35,8 +35,16 @@ POST /api/friends/:id/gift     Nhận quà
 POST /api/friends/:id/chat     Gửi tin nhắn
 GET  /api/game/state           Tải save
 PUT  /api/game/state           Lưu save
+GET  /api/plaza                Poll phòng chiếu + presence
+POST /api/plaza/queue          Thêm video YouTube
+POST /api/plaza/skip           Bỏ phiếu bỏ qua
+POST /api/plaza/ended          Báo video kết thúc
+POST /api/plaza/leave          Rời phòng
 GET  /api/admin/*              Thống kê, users, capacity, audit
 ```
+
+### Quảng trường
+Mỗi người xem poll mỗi **3 giây** (20 request/phút), cao hơn social. Phòng hiện lưu trong RAM một process Node, phù hợp vài trăm người xem đồng thời. Trên 1.000 người xem cùng lúc nên chuyển presence/queue sang Redis và dùng WebSocket/SSE thay polling; 10.000 người xem đồng thời cần khoảng 3.300 request/giây chỉ riêng polling, vượt mô hình một node.
 
 ---
 

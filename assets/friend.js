@@ -28,18 +28,18 @@
 
   const THEMES = {
     peach: {
-      sky: ['#ffe0b6', '#c9eff0'], hill: ['#a8d97d', '#7fc35d'], grass: '#86cc55',
-      roof: '#d9694d', roof2: '#a84433', wall: '#fff0cd', door: '#8a5530',
+      sky: ['#e8d7ba', '#d7e8df'], hill: ['#c5d1a6', '#a0b388'], grass: '#a1b779',
+      roof: '#ce896d', roof2: '#985747', wall: '#fff0d5', door: '#8a6441',
       accent: '#ff9b86', flower: '#ffb3a1'
     },
     mint: {
-      sky: ['#c9f5e4', '#bfe8ff'], hill: ['#a4df9f', '#78c77d'], grass: '#83ce73',
-      roof: '#4f95a8', roof2: '#2f6c7f', wall: '#fff8dc', door: '#7f5630',
+      sky: ['#c4dfd4', '#c1dce2'], hill: ['#bfd2b5', '#9ab69b'], grass: '#99b78a',
+      roof: '#78a4a4', roof2: '#496f79', wall: '#fff6df', door: '#816340',
       accent: '#65b8d9', flower: '#8fe3c7'
     },
     lavender: {
-      sky: ['#f3ddff', '#d4eeff'], hill: ['#b8dda0', '#8bca88'], grass: '#8dcc68',
-      roof: '#9e6db1', roof2: '#704782', wall: '#fff4d9', door: '#7c5730',
+      sky: ['#e3d7e4', '#cedfe7'], hill: ['#c6d2b8', '#a1b697'], grass: '#a2b88b',
+      roof: '#a58ba7', roof2: '#77617f', wall: '#fff3dc', door: '#806344',
       accent: '#b69be8', flower: '#d6b6ff'
     }
   };
@@ -68,7 +68,7 @@
     // vignette ấm
     const vg = ctx.createRadialGradient(640, 360, 220, 640, 360, 760);
     vg.addColorStop(0, 'rgba(255,245,190,0)');
-    vg.addColorStop(1, 'rgba(80,60,20,.14)');
+    vg.addColorStop(1, 'rgba(47,68,48,.10)');
     ctx.fillStyle = vg;
     ctx.fillRect(0, 0, W, H);
   }
@@ -78,7 +78,7 @@
     const g = ctx.createLinearGradient(0, 0, 0, 300);
     g.addColorStop(0, th.sky[0]);
     g.addColorStop(0.6, th.sky[1]);
-    g.addColorStop(1, '#f2fbe0');
+    g.addColorStop(1, '#f0efdb');
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, 310);
 
@@ -96,6 +96,13 @@
 
   function drawHills(ctx, th, rnd) {
     ctx.beginPath();
+    ctx.moveTo(-30, 219);
+    ctx.bezierCurveTo(180, 133, 280, 176, 440, 149);
+    ctx.bezierCurveTo(620, 112, 790, 177, 940, 150);
+    ctx.bezierCurveTo(1100, 113, 1210, 174, 1320, 145);
+    ctx.lineTo(1320, 300); ctx.lineTo(-30, 300); ctx.closePath();
+    ctx.fillStyle = '#d5ddc4'; ctx.fill();
+    ctx.beginPath();
     ctx.moveTo(-30, 255);
     ctx.bezierCurveTo(150, 160, 300, 220, 480, 185);
     ctx.bezierCurveTo(650, 150, 790, 220, 940, 190);
@@ -112,18 +119,18 @@
       const x = 30 + i * 47 + rnd() * 22;
       const y = 235 + Math.sin(i) * 10;
       const s = 16 + rnd() * 18;
-      ctx.globalAlpha = 0.5;
-      U.ellipse(ctx, x, y - s * 0.5, s * 0.7, s * 0.55, '#4e8f43');
-      U.ellipse(ctx, x + s * 0.4, y - s * 0.85, s * 0.5, s * 0.45, '#63a64e');
+      ctx.globalAlpha = 0.32;
+      U.ellipse(ctx, x, y - s * 0.5, s * 0.7, s * 0.55, '#587d5c');
+      U.ellipse(ctx, x + s * 0.4, y - s * 0.85, s * 0.5, s * 0.45, '#79955d');
       ctx.globalAlpha = 1;
     }
   }
 
   function drawGround(ctx, th, rnd) {
     const g = ctx.createLinearGradient(0, 200, 0, H);
-    g.addColorStop(0, '#9ade69');
+    g.addColorStop(0, '#b8ca94');
     g.addColorStop(0.5, th.grass);
-    g.addColorStop(1, '#5aaa38');
+    g.addColorStop(1, '#76945e');
     ctx.fillStyle = g;
     ctx.beginPath();
     ctx.moveTo(-20, 255);
@@ -136,7 +143,7 @@
 
     ctx.save();
     ctx.clip();
-    ctx.globalAlpha = 0.05;
+    ctx.globalAlpha = 0.025;
     for (let i = 0; i < 10; i++) {
       ctx.fillStyle = i % 2 ? '#fff' : '#255f1d';
       ctx.beginPath();
@@ -149,7 +156,7 @@
     for (let i = 0; i < 120; i++) {
       const x = 20 + rnd() * 1240, y = 280 + rnd() * 410;
       ctx.globalAlpha = 0.25 + rnd() * 0.3;
-      U.drawGrassTuft(ctx, x, y, 1.5 + rnd() * 2, rnd() > 0.5 ? '#4b9732' : '#6dbb43');
+      U.drawGrassTuft(ctx, x, y, 1.5 + rnd() * 2, rnd() > 0.5 ? '#617d4d' : '#c1d294');
     }
     ctx.globalAlpha = 1;
     const flowers = [
@@ -202,9 +209,9 @@
     ctx.beginPath();
     ctx.ellipse(p.x, p.y, p.rx, p.ry, -0.08, 0, TAU);
     const g = ctx.createLinearGradient(0, p.y - p.ry, 0, p.y + p.ry);
-    g.addColorStop(0, '#9beee4');
-    g.addColorStop(0.5, '#4cc7cb');
-    g.addColorStop(1, '#1d8fa4');
+    g.addColorStop(0, '#b7dbcf');
+    g.addColorStop(0.5, '#73b4b2');
+    g.addColorStop(1, '#447f8b');
     ctx.fillStyle = g;
     ctx.fill();
     ctx.strokeStyle = 'rgba(15,100,110,.35)';
@@ -251,7 +258,7 @@
   function drawTree(ctx, t) {
     const x = LAYOUT.tree.x, y = LAYOUT.tree.y;
     ctx.save();
-    U.ellipse(ctx, x, y + 8, 92, 26, 'rgba(45,80,25,.22)');
+    U.ellipse(ctx, x + 15, y + 8, 98, 24, 'rgba(48,70,43,.18)');
     ctx.fillStyle = '#8a5a2d';
     U.fillRR(ctx, x - 9, y - 100, 18, 110, 7, '#8a5a2d');
     ctx.strokeStyle = '#67411f';
@@ -263,10 +270,18 @@
       [-6, -126, 58, 42], [36, -105, 40, 32], [-60, -115, 36, 30]
     ];
     blobs.forEach(([bx, by, rx, ry], i) => {
-      U.ellipse(ctx, x + bx, y + by, rx, ry, i % 2 ? '#4f9c37' : '#5dae42');
-      ctx.globalAlpha = 0.28;
-      U.ellipse(ctx, x + bx - rx * 0.2, y + by - ry * 0.3, rx * 0.55, ry * 0.45, '#b9e78d');
-      ctx.globalAlpha = 1;
+      const leaf = ctx.createRadialGradient(x + bx - rx * .4, y + by - ry * .55, 2, x + bx, y + by, rx * 1.15);
+      leaf.addColorStop(0, i % 2 ? '#a8bf75' : '#b5c980');
+      leaf.addColorStop(.5, i % 2 ? '#789450' : '#839e59');
+      leaf.addColorStop(1, '#486b48');
+      U.ellipse(ctx, x + bx, y + by, rx, ry, leaf);
+      ctx.save(); ctx.globalAlpha = .28;
+      for (let j = 0; j < 5; j++) {
+        const a = j * 2.4 + i;
+        U.ellipse(ctx, x + bx + Math.cos(a) * rx * .55, y + by + Math.sin(a) * ry * .55,
+          rx * .12, ry * .065, '#eef1b8', -.4);
+      }
+      ctx.restore();
     });
     const rnd = U.makeRand(22);
     for (let i = 0; i < 8; i++) {
@@ -319,8 +334,8 @@
     });
     ctx.closePath();
     const g = ctx.createLinearGradient(0, 250, 0, 500);
-    g.addColorStop(0, '#a9e474');
-    g.addColorStop(1, '#7ac64e');
+    g.addColorStop(0, '#bbca8e');
+    g.addColorStop(1, '#8fa967');
     ctx.fillStyle = g;
     ctx.fill();
     // viền gỗ mỏng
@@ -471,6 +486,8 @@
     }
     ctx.restore();
     // ống khói
+    U.fillRR(ctx, x - 116, base - 174, 232, 9, 2, 'rgba(70,48,30,.18)');
+    U.fillRR(ctx, x - 128, base - 180, 266, 5, 2, '#e5c59b');
     U.fillRR(ctx, x + 90, base - 300, 26, 60, 3, '#b08058');
     ctx.strokeStyle = '#7a4a2c'; ctx.lineWidth = 2;
     U.rr(ctx, x + 90, base - 300, 26, 60, 3);

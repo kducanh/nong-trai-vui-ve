@@ -1,0 +1,383 @@
+/* Warm paper, forest green and honey: shared visual language for the game.
+   Dimensions follow the existing 1280 × 720 canvas coordinate system. */
+:root {
+  --ink: #344d3c;
+  --ink-soft: #727461;
+  --cream: #fffaf0;
+  --leaf: #658d52;
+  --leaf-dark: #345b46;
+  --gold: #e9bb63;
+  --panel: rgba(255, 251, 240, .97);
+  --line: rgba(95, 108, 70, .18);
+  --panel-shadow: 0 .3em 1.1em rgba(39, 65, 35, .16), inset 0 1px 0 #fffef6;
+}
+html, body { background: #253f32; }
+#app { background: radial-gradient(ellipse at 50% 20%, #64735a, #253f32 80%); }
+#stage { box-shadow: 0 1em 5em #152c3480; }
+.sun-wash { opacity: .45; }
+.vignette { box-shadow: inset 0 -2em 5em rgba(34, 64, 39, .12); }
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: .18em solid #315f4b;
+  outline-offset: .22em;
+}
+button { -webkit-tap-highlight-color: transparent; }
+
+/* A floating header leaves a little breathing room around the landscape. */
+.topbar {
+  top: .75em; left: .9em; right: .9em; height: 4.3em;
+  padding: .4em .75em; gap: .55em;
+  background: var(--panel); border: 1px solid #fffdf5;
+  border-radius: 1.1em; box-shadow: var(--panel-shadow);
+}
+.topbar::after { display: none; }
+.brand-block { width: 12em; gap: .55em; }
+.brand-logo {
+  width: 2.9em; height: 2.9em; border-radius: .85em;
+  background: #e8efd7; border: 1px solid #d9e4c5; box-shadow: none;
+}
+.brand-logo svg { width: 2.2em; height: 2.2em; }
+.brand-copy b { color: #345b46; font-size: .9em; }
+.brand-copy b span { color: #a97e3e; }
+.brand-copy small { color: #77785e; margin-top: .5em; font-size: .57em; font-weight: 600; }
+.main-nav { gap: .25em; }
+.nav-tab {
+  width: 4.45em; height: 4.2em; border-radius: .8em;
+  color: #66745a; font-weight: 700;
+}
+.nav-label { font-size: .76em; }
+.nav-ic { width: 1.9em; height: 1.9em; }
+.nav-tab:hover { background: #eef1e3; }
+.nav-tab.active { background: #e5ecd5; border-color: #d2dfbb; color: #34583f; box-shadow: none; }
+.nav-tab.active::after {
+  content: ''; position: absolute; bottom: -.4em; width: 1.15em; height: .18em;
+  border-radius: 1em; background: #66894f;
+}
+.nav-dot, .rail-dot { background: #dd8463; box-shadow: none; animation: none; }
+.nav-count { background: #edc67e; box-shadow: none; border-radius: 50%; }
+.topbar-right { gap: .45em; }
+.player-mini { gap: .5em; padding-right: .6em; border-color: var(--line); }
+.avatar-wrap.mini .avatar { width: 2.75em; height: 2.75em; box-shadow: none; border: 1px solid #d3dfcd; }
+.mini-copy { width: 5.7em; gap: .35em; }
+.mini-name { color: #345b46; font-size: .69em; }
+.mini-name .xp-text { font-size: .65em; }
+.xpbar.mini { height: .35em; border: 0; background: #dce3cc; box-shadow: none; }
+.xpbar i { background: #91ac6b; box-shadow: none; }
+.level-badge { background: #527e65; box-shadow: 0 .1em .2em #284f3a30; text-shadow: none; }
+.mini-chips { gap: .35em; }
+.mini-chips .chip { height: 2.25em; padding: 0 .65em; background: #f5ecd6; border: 1px solid #ebdfbe; box-shadow: none; color: #806337; }
+.mini-chips .energy { background: #edf0dc; border-color: #e0e7c6; color: #5e7444; }
+.energy-mini { left: .6em; right: .6em; height: .12em; background: #d7dfbd; }
+.energy-mini i { background: #9bb770; }
+.account-btn { height: 2.6em; font-size: .63em; background: #eef0e3; color: #53694c; border: 1px solid #dce3cf; box-shadow: none; }
+.icon-btn { width: 2.35em; height: 2.35em; background: transparent; border: 1px solid #e0e5d5; box-shadow: none; }
+.icon-btn svg { width: 1.55em; height: 1.55em; }
+.icon-btn .qmark { color: #577252; text-shadow: none; font-size: 1.35em; }
+.icon-btn:hover { background: #e9eedb; }
+
+/* Area navigation and the daily task use the same quiet paper surface. */
+.garden-caption { position: absolute; top: 6.3em; left: 50%; transform: translateX(-50%); text-align: center; color: #345b46; }
+.garden-caption span { display: block; font-size: .52em; letter-spacing: .22em; font-weight: 800; opacity: .8; }
+.garden-caption b { display: block; font-family: Georgia, 'Times New Roman', serif; font-size: 1.55em; margin-top: .18em; text-shadow: 0 1px #fff9df80; }
+#stage.area-mode .garden-caption, #stage.visit-mode .garden-caption { display: none; }
+.farm-rail { top: 6.35em; left: 1em; width: 10.65em; gap: .4em; }
+.rail-heading { color: #47634b; text-shadow: none; font-size: .55em; letter-spacing: .12em; padding: 0 .85em .45em; }
+.rail-btn {
+  height: 3.05em; gap: .65em; padding: .25em .75em;
+  border: 1px solid #fffdf5; border-radius: .8em;
+  background: var(--panel); color: #5a694f; box-shadow: 0 .18em .5em #345b4615;
+  font-weight: 650;
+}
+.rail-btn.active { background: #3f684e; color: #fff9e9; border-color: #577e5b; box-shadow: 0 .25em .7em #284b382b; }
+.rail-btn:hover { background: #ecf1dd; }
+.rail-btn.active:hover { background: #497457; }
+.rail-btn.active::after { content: '›'; margin-left: auto; font-size: 1.4em; font-weight: 400; color: #e8d9a8; }
+.rail-ic { width: 1.8em; height: 1.8em; }
+.farm-task {
+  margin-top: .8em; padding: .85em .8em .8em; min-height: 5.7em; gap: .4em;
+  border: 1px solid #e6d8b7; border-radius: .9em;
+  background: #fffae9; color: #53654a; box-shadow: var(--panel-shadow); transform: none;
+}
+.farm-task:hover { transform: translateY(-.12em); }
+.farm-task-label { color: #8c8968; font-size: .55em; letter-spacing: .08em; }
+.farm-task-text { font-family: var(--font-ui); font-size: .76em; line-height: 1.35; font-weight: 700; color: #3e5f46; }
+.farm-task-count { top: 1.6em; right: 1.2em; color: #8b713d; font-size: .54em; }
+.farm-task-progress { margin-top: .25em; height: .3em; background: #e6e7d2; }
+.farm-task-progress i { background: #a0b77b; }
+
+/* Tools and seeds keep clear, consistent selected states. */
+.hud-bottom { bottom: .85em; gap: .55em; }
+.farm-controls { gap: .55em; }
+.seed-info, .seed-strip, .dock, .area-dock, .visit-bottom {
+  background: var(--panel); border: 1px solid #fffdf5; box-shadow: var(--panel-shadow); border-radius: 1em;
+}
+.seed-info { width: 15.4em; height: 3.65em; gap: .5em; padding: .3em .7em; }
+.seed-info-copy { gap: .2em; }
+.seed-info-copy b { color: #3e5d42; font-size: .78em; }
+.seed-info-copy span { color: #77785f; font-size: .57em; }
+.seed-info-copy small { color: #728752; font-size: .55em; }
+.hud-bottom .seed-strip { height: 3.65em; padding: .35em .65em; gap: .65em; }
+.seed-strip-label { color: #8c7b55; font-size: .55em; }
+.seed-list { gap: .4em; }
+.seed-chip { background: #f4f0df; border: 1px solid #e2dcc5; box-shadow: none; border-radius: .6em; }
+.seed-chip.active { background: #f6e5b6; border-color: #c59b4f; box-shadow: 0 0 0 .1em #e9c77f; transform: translateY(-.08em); }
+.seed-chip .seed-count { background: #fffaf0; border: 1px solid #d9d5be; color: #5d704c; box-shadow: none; }
+.seed-chip .mini-lock { background: #eee9d8; border: 1px solid #d9d5be; color: #7a7a65; box-shadow: none; }
+.seed-chip.locked { opacity: .58; }
+.quick-actions { gap: .45em; }
+.quick-btn { height: 4.35em; background: #eaf2e3; border: 1px solid #f7f9ed; color: #476447; box-shadow: var(--panel-shadow); border-radius: .9em; padding: .3em .7em; }
+#waterAllBtn { background: #e7f1ef; color: #4d7773; }
+.quick-btn:disabled { opacity: .72; filter: saturate(.5); }
+.quick-btn b { background: #ffffff80; color: inherit; }
+.dock-wrap { filter: none; }
+.hud-bottom .dock { padding: .4em .55em; gap: .4em; border-radius: 1.15em; }
+.hud-bottom .tool { width: 4.65em; min-height: 3.6em; border-radius: .75em; padding: .2em .25em .35em; }
+.tool { background: transparent; box-shadow: none; border: 1px solid transparent; color: #617455; }
+.tool:hover { background: #edf1df; }
+.tool.active { background: #e6edcf; border-color: #b6c795; box-shadow: inset 0 -.15em #adc28a; transform: translateY(-.08em); color: #3c5b3c; }
+.hud-bottom .tool-ic { width: 2.35em; height: 2.35em; }
+.hud-bottom .tool-name { font-size: .6em; font-weight: 650; text-shadow: none; }
+.tool .key { background: #e6e9db; color: #7b896e; font-size: .5em; }
+.tool.active .key { background: #cfdcba; color: #4c6b40; }
+
+/* Planting workspace: large field, a seed guide, and two orderly tool rows. */
+.garden-caption { left: 16.7%; transform: none; text-align: left; }
+.garden-caption b { font-size: 1.4em; }
+.planting-sidebar {
+  position: absolute; top: 6.4em; right: 1em; width: 15.3em;
+  display: flex; flex-direction: column; gap: .65em; pointer-events: auto;
+}
+#stage.area-mode .planting-sidebar, #stage.visit-mode .planting-sidebar { display: none; }
+.garden-summary, .seed-guide {
+  background: var(--panel); border: 1px solid #fffdf5;
+  border-radius: 1em; box-shadow: var(--panel-shadow); padding: .85em;
+}
+.summary-heading { display: flex; align-items: center; justify-content: space-between; gap: .5em; }
+.summary-heading > span, .guide-heading { color: #899070; font-size: .57em; font-weight: 750; letter-spacing: .1em; }
+.summary-heading > b { color: #698059; font-size: .6em; font-weight: 600; }
+.garden-stats { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: .8em; }
+.garden-stats > div { display: flex; flex-direction: column; gap: .25em; align-items: center; color: #8b7c51; }
+.garden-stats > div + div { border-left: 1px solid #e7e8d8; }
+.garden-stats b { font-size: 1.45em; line-height: 1; font-weight: 650; }
+.garden-stats span { font-size: .62em; }
+.garden-stats .stat-ready { color: #557646; }
+.garden-stats .stat-thirsty { color: #56858b; }
+.expand-land-btn {
+  display: flex; align-items: center; justify-content: space-between; gap: .6em;
+  width: 100%; padding: .8em 0 0; margin-top: .8em; border: 0; border-top: 1px solid #e5e5d0;
+  background: transparent; font-size: .6em; color: #8a8b70; text-align: left;
+}
+.expand-land-btn b { color: #8b6b32; font-weight: 700; }
+.expand-land-btn:hover:not(:disabled) b { color: #4f7040; text-decoration: underline; }
+.expand-land-btn:disabled { cursor: default; }
+.expand-land-btn:disabled b { color: #6b8656; }
+.land-modal { width: min(94%, 34em); }
+.land-offer { display: flex; align-items: center; gap: 1.2em; margin: .2em 0 1em; }
+.land-preview { flex: 0 0 5.7em; height: 5.7em; display: grid; place-items: center; background: #e3ebce; border: 1px solid #b9c99a; border-radius: 1.1em; box-shadow: inset 0 -.3em #c8d6b1; }
+.land-preview > span { font-size: 2.8em; }
+.land-offer small { display: block; font-size: .57em; letter-spacing: .08em; color: #8a8d71; }
+.land-offer b { display: block; color: #9e7735; font-size: 1.9em; margin-top: .15em; }
+.land-offer b span { font-size: .5em; font-weight: 600; }
+.land-offer p { color: #788268; font-size: .74em; line-height: 1.6; margin: .4em 0 0; }
+.land-wallet { background: #f2f3e4; border-radius: .8em; padding: .6em 1em; margin: 0; }
+.land-wallet > div { display: flex; align-items: center; justify-content: space-between; padding: .45em 0; gap: 1em; font-size: .8em; }
+.land-wallet dt { color: #80866c; }
+.land-wallet dd { margin: 0; font-weight: 750; color: #587347; }
+.land-wallet .shortfall { color: #b17d3c; }
+.land-note, .land-shortfall { font-size: .68em; color: #8c8e74; line-height: 1.6; margin: .9em 0 0; }
+.land-shortfall { color: #9b7138; background: #f8efd8; border-radius: .6em; padding: .7em .85em; }
+.land-actions { gap: .5em; flex-wrap: wrap; }
+.land-actions .btn { font-size: .76em; }
+.land-actions .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; filter: none; }
+.seed-guide { padding-bottom: .95em; }
+.seed-guide .seed-info {
+  display: flex; width: 100%; height: auto; min-height: 4.2em; margin: .4em 0 .55em;
+  padding: 0; border: 0; background: transparent; box-shadow: none; gap: .55em;
+}
+.seed-guide .seed-info .item-icon { width: 3.4em; height: 3.4em; }
+.seed-guide .seed-info-copy { gap: .35em; }
+.seed-guide .seed-info-copy b { font-size: 1em; }
+.seed-guide .seed-info-copy span { white-space: normal; font-size: .6em; line-height: 1.5; }
+.seed-guide .seed-info-copy small { font-size: .61em; color: #6e8a4e; }
+.seed-facts { display: grid; grid-template-columns: 1fr 1fr; gap: .8em .75em; border-top: 1px solid #e5e7d6; padding-top: .8em; }
+.seed-facts > div { display: flex; flex-direction: column; gap: .25em; }
+.seed-facts span { color: #8a8e77; font-size: .57em; }
+.seed-facts b { font-size: .76em; font-weight: 650; color: #567046; }
+.planting-sidebar .quick-actions { display: flex; gap: .45em; }
+.planting-sidebar .quick-btn { flex: 1; min-width: 0; height: 3.8em; font-size: .7em; padding: .4em; justify-content: center; gap: .25em; }
+.planting-sidebar .quick-ic { width: 1.5em; height: 1.5em; }
+.planting-sidebar .quick-btn b { font-size: .85em; }
+.hud-bottom { bottom: .55em; gap: .5em; }
+.farm-controls { width: min(58em, calc(100% - 2em)); }
+.hud-bottom .seed-strip { width: 100%; height: 4.4em; border-radius: 1em; padding: .45em .65em; gap: .6em; }
+.seed-tray-heading { display: flex; flex-direction: column; gap: .3em; padding: 0 .3em; flex-shrink: 0; }
+.seed-tray-heading b { font-size: .75em; color: #57734b; }
+.seed-tray-heading small { font-size: .55em; color: #919477; }
+.seed-list { flex: 1; min-width: 0; gap: .4em; }
+.hud-bottom .seed-chip {
+  flex: 1; min-width: 0; width: auto; height: 3.4em; font-size: 1em;
+  justify-content: flex-start; gap: .2em; padding: .25em .3em; border-radius: .65em;
+}
+.hud-bottom .seed-chip .item-icon { flex: 0 0 auto; width: 2.05em; height: 2.6em; object-fit: contain; }
+.seed-card-copy { display: flex; flex-direction: column; gap: .35em; min-width: 0; text-align: left; }
+.seed-card-copy b { font-size: .62em; white-space: nowrap; color: #526b45; font-weight: 700; }
+.seed-card-copy small { font-size: .51em; white-space: nowrap; color: #8c8a69; }
+.seed-chip .seed-count { bottom: .12em; right: .2em; font-size: .55em; min-width: 1.4em; height: 1.4em; }
+.seed-chip .mini-lock { display: none; }
+.seed-chip.locked { opacity: .65; }
+.seed-chip.locked .seed-count { display: none; }
+.seed-shop-btn {
+  font-size: .65em; font-weight: 650; color: #6d8157; background: #eff1e1;
+  border: 1px dashed #b8c59a; border-radius: .7em; padding: .9em .7em; white-space: nowrap;
+}
+.seed-shop-btn:hover { background: #e5eccf; }
+.seed-shop-btn span { padding-left: .2em; }
+.dock-wrap { display: flex; align-items: center; width: min(47em, calc(100% - 2em)); background: var(--panel); border: 1px solid #fffdf5; border-radius: 1em; box-shadow: var(--panel-shadow); }
+.hud-bottom .dock { background: none; border: 0; box-shadow: none; padding: .35em .5em; }
+.hud-bottom .tool { width: 4.1em; min-height: 3.4em; font-size: 1em; }
+.hud-bottom .tool-ic { width: 2em; height: 2em; }
+.hud-bottom .tool-name { font-size: .57em; }
+.tool-context { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .3em; padding: .35em .9em; margin: .4em 0; border-left: 1px solid #dfe5cf; }
+.tool-context b { color: #57754b; font-size: .72em; font-weight: 700; }
+.tool-context span { color: #8a8e75; font-size: .6em; line-height: 1.5; }
+
+/* A storybook opening with a clear view into the farm. */
+.start-screen {
+  align-items: flex-start; padding: 2.5em 4.3em;
+  background: linear-gradient(90deg, rgba(250,247,224,.98), rgba(250,247,224,.94) 26%, rgba(248,245,222,.74) 39%, rgba(248,245,222,.08) 63%, transparent 85%);
+  backdrop-filter: none;
+}
+.start-inner { width: 28em; max-width: 47%; align-items: flex-start; text-align: left; padding: 0; }
+.logo-sprout { width: 4.2em; margin: 0 0 .7em -.7em; filter: none; }
+.start-eyebrow { font-size: .58em; letter-spacing: .19em; font-weight: 750; color: #74815f; text-shadow: none; margin-bottom: 1.4em; }
+.game-logo { align-items: flex-start; font-size: 1em; line-height: 1.05; transform: none; padding: 0; }
+.logo-small { font-family: Georgia, 'Times New Roman', serif; font-size: 3.15em; font-weight: 700; letter-spacing: -.05em; color: #345b46; text-shadow: none; margin-bottom: .04em; }
+.logo-big { font-family: Georgia, 'Times New Roman', serif; font-size: 5.7em; font-weight: 700; letter-spacing: -.055em; white-space: nowrap; color: #b7813e; -webkit-text-stroke: 0; text-shadow: 0 .025em #fdf6d9; }
+.start-tagline { color: #687259; font-weight: 400; font-size: .88em; line-height: 1.8; text-shadow: none; margin: 1.35em 0 0; }
+.start-actions { justify-content: flex-start; margin-top: 1.55em; }
+.btn { background: #4b7755; border: 1px solid #6d8e5b; border-radius: .75em; box-shadow: 0 .18em 0 #34583d, 0 .35em .7em #34583d1f; font-weight: 700; text-shadow: none; }
+.btn:hover { filter: brightness(1.07); }
+.btn:active { box-shadow: 0 .05em 0 #34583d; }
+.btn-start, #btnContinue { font-size: 1em; padding: 1em 1.4em; background: #416d4f; border-color: #597e54; box-shadow: 0 .2em 0 #2c5139, 0 .5em 1em #34583d26; }
+.btn-start::after, #btnContinue::after { content: '→'; margin-left: 1.8em; font-size: 1.15em; }
+.btn-gold { background: #ebc778; color: #6d542c; border-color: #d8b35f; box-shadow: 0 .18em 0 #b59754; }
+.btn-ghost { background: #f5efdf; color: #5b734e; border-color: #e1dcc5; box-shadow: 0 .15em 0 #d2cdb5; }
+.btn-link { color: #6b775e; text-shadow: none; font-size: .64em; margin-top: .8em; }
+.start-account-btn { color: #6b775e; background: transparent; border: 0; box-shadow: none; padding: .35em 0; font-weight: 600; }
+.start-account-btn:hover { background: transparent; color: #345b46; }
+.start-features { justify-content: flex-start; gap: .75em; margin-top: 1.5em; }
+.start-features span { padding: 0; border: 0; background: none; color: #6e795e; text-shadow: none; font-size: .63em; font-weight: 600; backdrop-filter: none; }
+.start-features i { font-size: 1.1em; }
+.start-note { color: #82866f; font-size: .56em; text-shadow: none; margin-top: 1.3em; }
+.start-deco { opacity: .25; }
+.start-deco-left { left: -3em; bottom: -4em; width: 10em; }
+.start-deco-right { display: none; }
+.start-footer { bottom: 1.8em; left: 6.3em; right: auto; color: #768468; text-shadow: none; font-size: .6em; text-transform: none; letter-spacing: .04em; }
+.start-footer span:nth-child(2) { letter-spacing: .04em; }
+.start-postcard {
+  position: absolute; top: 3em; right: 3em; display: flex; align-items: center; gap: .7em;
+  padding: .8em 1.25em; border: 1px solid #fffbe3a6; border-radius: 1em;
+  background: #fffbe7c9; color: #566e4f; box-shadow: 0 .3em 1em #446a3412; transform: rotate(3deg);
+}
+.postcard-sun { color: #c29a4e; font-size: 2em; line-height: 1; }
+.start-postcard > span:last-child { font-family: Georgia, 'Times New Roman', serif; font-size: .85em; }
+.start-postcard small { display: block; font-family: var(--font-ui); font-size: .65em; color: #85906f; margin-top: .3em; }
+
+/* Menus, visits and area pages share the softer materials. */
+.modal-panel, .account-panel { background: #fffbef; border: 1px solid #fefdf5; border-radius: 1.2em; box-shadow: 0 1em 3em #193c3d4d; }
+.modal-panel::before { display: none; }
+.modal-backdrop { background: #203d3859; backdrop-filter: blur(.35em); }
+.modal-head { border-bottom: 1px solid #e5e6d2; padding: 1.1em 1.35em .9em; }
+.modal-title h2 { color: #3e6349; font-family: Georgia, 'Times New Roman', serif; font-size: 1.65em; text-shadow: none; }
+.modal-title p { color: #80846c; margin-top: .3em; }
+.modal-close { background: #eeeede; color: #65775c; border: 0; border-radius: .65em; box-shadow: none; font-weight: 400; }
+.modal-close:hover { transform: scale(1.04); background: #e3e8d1; }
+.shop-card, .bag-card, .quest-card, .daily-card, .setting-row { border-color: #e2e1cc; background: #fffdf5; box-shadow: none; }
+.tooltip, .toast { background: #fffbed; border-color: #d9ddc6; box-shadow: var(--panel-shadow); color: #5a6a50; }
+.area-top { top: 6.3em; }
+.area-sign { background: var(--panel); border: 1px solid #fffdf4; border-radius: .85em; box-shadow: var(--panel-shadow); transform: none; padding: .6em 1em; }
+.area-sign h1 { color: #3e6349; font-family: Georgia, 'Times New Roman', serif; font-size: 1.4em; }
+.area-sign small { color: #8d8d6e; }
+.area-sign p { color: #7b8367; margin-top: .25em; }
+.area-back, .visit-back, .visit-btn { background: #f9f8e9; border: 1px solid #e6e8d2; box-shadow: 0 .1em .4em #345b4615; color: #59704f; }
+.area-dock { padding: .7em .9em; }
+.animal-pick { border-color: #dce2ca; background: #f5f5e7; }
+.animal-pick.active { background: #e6edcf; border-color: #aebf8e; box-shadow: none; }
+.visit-topbar { background: var(--panel); border-bottom: 1px solid #e1e4ce; box-shadow: var(--panel-shadow); }
+.visit-btn.gold { background: #ebcc88; color: #6e5730; }
+
+@media (max-width: 1100px) {
+  .brand-block { width: 10.6em; }
+  .mini-copy { display: none; }
+  .main-nav { gap: .1em; }
+  .seed-info { display: none; }
+}
+@media (max-width: 900px) {
+  .topbar { top: .55em; left: .65em; right: .65em; height: 4.2em; padding: .3em .55em; gap: .35em; }
+  .brand-block { width: 2.8em; }
+  .brand-copy { display: none; }
+  .nav-tab { width: 4.1em; height: 3.8em; }
+  .nav-label { font-size: .7em; }
+  .farm-rail { left: .75em; top: 5.65em; width: 3.6em; }
+  .rail-heading, .farm-task { display: none; }
+  .rail-btn { width: 3.5em; height: 3.5em; padding: .2em; justify-content: center; }
+  .rail-btn.active::after { display: none; }
+  .rail-btn span:not(.rail-ic) { display: none; }
+  .garden-caption { top: 5.7em; }
+  .garden-caption b { font-size: 1.3em; }
+  .area-top { top: 5.65em; left: 5em; }
+  .mini-chips .chip { font-size: .64em; padding: 0 .45em; }
+  .topbar-right { gap: .3em; }
+  .account-btn { font-size: .62em; }
+  .account-btn #accountLabel { max-width: 6em; }
+  .start-screen { padding-left: 3.5em; }
+  .start-inner { max-width: 51%; }
+  .start-postcard { right: 2em; top: 2em; }
+  .planting-sidebar { top: 5.65em; width: 13.5em; }
+  .seed-guide { display: none; }
+  .garden-summary { padding: .7em; }
+  .garden-stats { margin-top: .55em; }
+  .garden-stats b { font-size: 1.2em; }
+  .garden-stats span { font-size: .6em; }
+  .planting-sidebar .quick-actions { flex-direction: column; }
+  .planting-sidebar .quick-btn { flex: auto; height: 3.2em; font-size: .8em; }
+  .planting-sidebar .quick-btn span:not(.quick-ic) { display: inline; }
+  .planting-sidebar .quick-btn b { margin-left: auto; }
+  .planting-sidebar .quick-btn { justify-content: flex-start; padding: .4em .7em; }
+  .seed-tray-heading { display: none; }
+  .tool-context { display: none; }
+  .dock-wrap { width: auto; }
+}
+/* Short landscape screens use a compact dock, with all six tools available. */
+@media (max-height: 500px) and (orientation: landscape), (max-width: 640px) {
+  .land-modal { font-size: 1.1em; }
+  .land-actions .btn { font-size: .9em; min-height: 3.2em; }
+  .topbar { font-size: .93em; }
+  .nav-tab { font-size: 1em; width: 4.1em; height: 3.65em; }
+  .nav-label { font-size: .77em; }
+  .icon-btn { width: 2.8em; height: 2.8em; }
+  .account-btn { font-size: .95em; min-width: 3em; min-height: 3em; justify-content: center; }
+  .mini-chips .chip { font-size: .8em; }
+  .hud-bottom { bottom: .4em; gap: .3em; }
+  .farm-controls { width: calc(100% - 1.5em); }
+  .hud-bottom .seed-strip { height: 3.9em; padding: .2em .5em; max-width: none; }
+  .hud-bottom .seed-chip { height: 3.3em; width: auto; }
+  .hud-bottom .seed-chip .item-icon { width: 2.2em; height: 2.5em; }
+  .seed-card-copy b { font-size: .72em; }
+  .seed-card-copy small { font-size: .62em; }
+  .hud-bottom .dock { padding: .25em .4em; }
+  .hud-bottom .tool { min-height: 3.2em; width: 4.6em; }
+  .hud-bottom .tool-ic { width: 1.8em; height: 1.8em; }
+  .hud-bottom .tool-name { font-size: .65em; }
+  .quick-btn { height: 3.6em; }
+  .start-screen { padding: 1.5em 3.5em; }
+  .logo-sprout { width: 3em; margin-bottom: .2em; }
+  .start-eyebrow { margin-bottom: .8em; }
+  .logo-small { font-size: 2.6em; }
+  .logo-big { font-size: 4.6em; }
+  .start-tagline { font-size: .8em; margin-top: .85em; }
+  .start-actions { margin-top: 1em; }
+  .btn-start, #btnContinue { padding: .75em 1.2em; }
+  .start-features { margin-top: .9em; }
+  .start-note { margin-top: .8em; }
+  .start-footer { bottom: 1.15em; }
+}

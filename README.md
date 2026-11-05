@@ -71,7 +71,7 @@ npm run seed:demo
 Mỗi mục mở một khu vực riêng, không còn dồn hết lên màn hình chính.
 
 ### Cột khu vực trong Nông trại
-`Trồng trọt` · `Chăn nuôi` · `Hồ cá` · `Vườn cây`
+`Trồng trọt` · `Chăn nuôi` · `Hồ cá` · `Vườn cây` · `Quảng trường`
 
 Đây là các **trang khu vực riêng**, chuyển qua lại bằng cột bên trái. Không còn hiện cả bốn khu cùng lúc trên một màn hình.
 
@@ -79,6 +79,7 @@ Mỗi mục mở một khu vực riêng, không còn dồn hết lên màn hình
 - **Chăn nuôi** là trang sân chuồng với bò/gà, cỏ khô, máng ăn và thanh điều khiển cho ăn/thu hoạch.
 - **Hồ cá** là trang câu cá với hồ nước và minigame kéo cá.
 - **Vườn cây** là trang cây táo với hình cây, trạng thái chín và nút hái quả.
+- **Quảng trường** là rạp chiếu ngoài trời dùng chung hàng đợi YouTube.
 - Thẻ **“Việc đang làm”** bên trái luôn nhắc mục tiêu tiếp theo; bấm vào để mở Nhiệm vụ.
 
 ---
@@ -86,6 +87,11 @@ Mỗi mục mở một khu vực riêng, không còn dồn hết lên màn hình
 ## 🌱 Trồng trọt
 
 - 12 ô đất isometric, 6 loại cây: cà rốt, cà chua, bắp, dâu tây, hướng dương, bí ngô.
+- Ván mới có **2 ô đất miễn phí**, chưa cuốc. Mỗi ô còn lại cần **đủ cả cấp độ và vàng**, ghi trực tiếp trên ô khóa.
+- Cấp 2: hai ô giá **80 / 100 vàng**; cấp 3: **150 / 200**; cấp 4: **250 / 300**; cấp 5: **400 / 500**; cấp 6: **650 / 800**. Lên cấp cho phép mua đất, không tự mở miễn phí.
+- Click ô khóa hoặc **Mở đất +** → xem cấp yêu cầu, giá và số vàng còn lại → xác nhận mua. Nút Mở đất gợi ý ô có cấp yêu cầu thấp nhất. Mỗi ô chỉ trả tiền một lần; mở đất không tốn năng lượng. Sau đó dùng Cuốc để tạo luống.
+- Chuỗi nhiệm vụ đầu là cuốc 2 ô → gieo 2 cà rốt → tưới 2 ô → thu hoạch 2 cây; nhận thưởng mỗi bước để lên cấp 2 ngay từ hai ô ban đầu.
+- Ô đã mở được lưu cùng tiến trình trên máy/tài khoản. Bản lưu cũ vẫn giữ các ô đã cuốc hoặc có cây, không cần chơi lại.
 - Chọn **Cuốc** → click ô cỏ để khai hoang.
 - Chọn gói hạt ở thanh dưới → click ô đất để gieo.
 - Tưới nước giúp cây lớn nhanh hơn; bón phân tăng thêm 1 nông sản khi thu hoạch.
@@ -117,6 +123,23 @@ Mở **Vườn bạn** trên thanh menu để ghé thăm vườn của 3 ngườ
 - Trạng thái đã tưới, quà đã nhận và điểm thân thiết được lưu lại theo ngày.
 
 > Khi chưa đăng nhập, game dùng 3 hàng xóm mẫu. Khi đăng nhập, danh sách bạn được lấy từ máy chủ: tìm theo tên tài khoản, gửi/nhận lời mời, thấy online và thăm vườn thật.
+
+---
+
+## 🎬 Quảng trường — xem YouTube cùng nhau
+
+Mở **Quảng trường** ở cột bên trái để vào rạp chiếu ngoài trời của làng.
+
+- Mọi người trong cùng phòng dùng **một hàng đợi và một mốc thời gian phát**.
+- Dán liên kết hoặc mã video YouTube vào ô nhập; server chỉ nhận **11 ký tự ID** hợp lệ.
+- Hàng đợi tối đa **20 video**; video đầu phát ngay, các video sau xếp hàng.
+- **Bỏ qua** cần đa số người đang xem bỏ phiếu; phiếu tự mất khi người đó rời phòng.
+- Người xem được đếm theo presence 15 giây; khách vẫn vào được, tài khoản đăng nhập hiện tên người đề xuất.
+- Nếu video chặn nhúng, giao diện báo lỗi và cho **mở trên YouTube** hoặc thử video khác.
+- Hàng đợi nằm trong RAM server, sẽ reset khi restart server. Chưa có chat riêng trong quảng trường.
+- YouTube có thể chặn autoplay; bấm **Xem cùng phòng** hoặc nút phát trên iframe.
+
+![Quảng trường](screenshots/plaza.png)
 
 ---
 
@@ -204,11 +227,22 @@ F:\nongtrai
 ├── docs
 │   └── server-capacity.md
 ├── server
+│   ├── plaza.mjs       # hàng đợi + đồng hồ phát chung
+│   ├── seed-demo.mjs
 │   └── data
 │       ├── nongtrai.db
 │       └── admin-credentials.txt
+├── tests
+│   ├── land.test.mjs
+│   ├── plaza.test.mjs
+│   └── plaza-client.test.mjs
 ├── assets
 │   ├── style.css       # giao diện, menu, bảng, vườn bạn
+│   ├── theme.css       # bảng màu, bố cục trồng trọt, giao diện mở đất
+│   ├── land.js         # giá đất, quyền sở hữu và chuyển đổi bản lưu cũ
+│   ├── plaza.js        # quảng trường YouTube phía client
+│   ├── plaza.css
+│   ├── plaza-night.svg
 │   ├── account.css     # tài khoản, bạn bè, chat
 │   ├── admin.css       # giao diện quản trị
 │   ├── art.js          # cảnh tĩnh của nông trại
@@ -227,6 +261,7 @@ F:\nongtrai
     ├── animals.png
     ├── fishing.png
     ├── orchard.png
+    ├── plaza.png
     ├── account.png
     ├── account_settings.png
     ├── admin_overview.png
@@ -239,6 +274,9 @@ F:\nongtrai
 ## 🔧 Ghi chú kỹ thuật
 
 - Frontend vanilla JavaScript, không cần build; backend Node.js thuần + SQLite, không cần framework.
+- Kiểm thử: `npm test` (đất đai, hàng đợi quảng trường, URL YouTube).
+- Quảng trường dùng guest cookie ký HMAC, rate limit và hàng đợi RAM; không lưu lịch sử video.
+- `Referrer-Policy` của `index.html` được nới thành `strict-origin-when-cross-origin` để iframe YouTube hoạt động.
 - Canvas 2D cho cảnh nông trại, vườn bạn và ba khu vực; cảnh tĩnh của nông trại được cache.
 - Khách: trạng thái lưu vào `localStorage` với khóa `nongtrai.vui.ve.save.v1`.
 - Đăng nhập: trạng thái đồng bộ lên SQLite qua API, có debounce khi lưu.
